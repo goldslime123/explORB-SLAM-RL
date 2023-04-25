@@ -49,10 +49,10 @@ class Map:
         rot0 = Rotation.from_quat([0., 0., 0., 1.])
         self.rot_camera_base = rot0
         self.t_camera_base = t0
-        self.T_camera_base = sp.SE3(self.rot_camera_base.as_dcm(), self.t_camera_base)
+        self.T_camera_base = sp.SE3(self.rot_camera_base.as_matrix(), self.t_camera_base)
 
         # Add KF at origin (kfId = 0)
-        self.Tcw['0'] = sp.SE3(rot0.as_dcm(), t0)
+        self.Tcw['0'] = sp.SE3(rot0.as_matrix(), t0)
 
         # Calibration values
         camera_info_topic = rospy.get_param('/decision_maker/cameraInfo_topic', '/robot_1/camera/rgb/camera_info')
@@ -79,7 +79,7 @@ class Map:
         """
         self.rot_camera_base = Rotation.from_quat(quat_camera_base)
         self.t_camera_base = t_camera_base
-        self.T_camera_base = sp.SE3(self.rot_camera_base.as_dcm(), self.t_camera_base)
+        self.T_camera_base = sp.SE3(self.rot_camera_base.as_matrix(), self.t_camera_base)
 
     def setEdges(self, edges_in: list):
         """
@@ -160,7 +160,7 @@ class Map:
             rot_cw = self.rot_camera_base * rot_cw
             tcw = self.rot_camera_base.apply(tcw, inverse=False)
 
-            Tcw = sp.SE3(rot_cw.as_dcm(), tcw)
+            Tcw = sp.SE3(rot_cw.as_matrix(), tcw)
 
             self.nKFs = max(self.nKFs, int(kfId))
             self.Tcw[kfId] = Tcw
@@ -201,7 +201,7 @@ class Map:
             # TODO Handle culled KFs (that dict key no longer exist). KF culling disabled for now
             if i_dict in self.Tcw:
                 t = self.Tcw[i_dict].translation()
-                r = Rotation.from_dcm(self.Tcw[i_dict].rotationMatrix())
+                r = Rotation.from_matrix(self.Tcw[i_dict].rotationMatrix())
                 pose = [t, r.as_quat()]  # x, y, z, w
                 nodes.append(np.concatenate([np.array([i]), pose]).ravel())
 
@@ -357,7 +357,7 @@ class Map:
         t_robot = [robot_pose.position.x, robot_pose.position.y, robot_pose.position.z]
         rot_robot = Rotation.from_quat([robot_pose.orientation.x, robot_pose.orientation.y, robot_pose.orientation.z,
                                         robot_pose.orientation.w])
-        T_map_base = sp.SE3(rot_robot.as_dcm(), t_robot)
+        T_map_base = sp.SE3(rot_robot.as_matrix(), t_robot)
 
         FIMS = {}
         exploitation_odom_H = {}
@@ -372,7 +372,7 @@ class Map:
         for (k, v) in reloc_kfs.items():
             if int(k) in self.Tcw:
                 p_temp = self.Tcw[int(k)].translation()
-                r_temp = Rotation.from_dcm(self.Tcw[int(k)].rotationMatrix())
+                r_temp = Rotation.from_matrix(self.Tcw[int(k)].rotationMatrix())
                 q_temp = r_temp.as_quat()
                 robot_pose2 = Pose()
                 robot_pose2.position.x = p_temp[0]
@@ -470,7 +470,7 @@ class Map:
         t_robot = [robot_pose.position.x, robot_pose.position.y, robot_pose.position.z]
         rot_robot = Rotation.from_quat([robot_pose.orientation.x, robot_pose.orientation.y, robot_pose.orientation.z,
                                         robot_pose.orientation.w])
-        T_map_base = sp.SE3(rot_robot.as_dcm(), t_robot)
+        T_map_base = sp.SE3(rot_robot.as_matrix(), t_robot)
 
         T_map_cam = self.T_camera_base.inverse() * T_map_base.inverse()
 
