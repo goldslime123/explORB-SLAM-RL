@@ -1,4 +1,4 @@
-ExplORB-SLAM
+ExplORB-SLAM-RL
 ============
 
 A package for Active visual SLAM using the structure of the underlying pose-graph.
@@ -7,7 +7,7 @@ Code used for the paper "ExplORB-SLAM: Active Visual SLAM Exploiting the Pose-gr
 
 Tested by jplaced for Ubuntu 20.04, ROS Noetic.
 
-Contact: jplaced@unizar.es, jjgomez@unizar.es
+Contact: jplaced@unizar.es, jjgomez@unizar.es, kenji188@gmail.com
 
 Citation
 ------------
@@ -32,23 +32,29 @@ Detected dependencies:
   * octomap_rviz_plugins
   * move_base
 
-Building
+Build Repository
 ------------
 1. Clone repo:
 ```
+Original Repository:
 git clone https://github.com/JulioPlaced/ExplORBSLAM.git
+
+Updated Repository:
+git clone https://github.com/goldslime123/explORB-SLAM-RL.git
 ```
 
-2. Build repo:
+2. Compile
 ```
-cd ExplORBSLAM/
-catkin b
+cd explORB-SLAM-RL/
+catkin make
 ```
 
-3. Remember to source the ExplORBSLAM workspace:
+3. Source the workspace:
 
   ```
-  source devel/setup.bash
+  source devel/setup.bash 
+  OR
+  source ./setup.bash
   ```
 
   If sourcing doesn't work properly, try
@@ -60,10 +66,9 @@ catkin b
 
   and rebuild.
 
-Running
-------------
-1. Launch the scenario:
 
+Launch Environments:
+------------
   AWS house environment:
   ```
   roslaunch robot_description aws_house.launch
@@ -77,7 +82,8 @@ Running
   roslaunch robot_description aws_warehouse.launch
   ```
 
-2. Launch the decision maker
+Launch Decision maker
+------------
   ```
   roslaunch decision_maker autonomous_agent.launch
   ```
