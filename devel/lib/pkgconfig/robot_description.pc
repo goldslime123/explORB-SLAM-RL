@@ -1,0 +1,8 @@
+prefix=/home/kenji/ws/explORB-SLAM-RL/devel
+
+Name: robot_description
+Description: Description of robot_description
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: roscpp rospy std_msgs turtlebot3_teleop urdf rviz xacro gazebo_ros robot_state_publisher move_base octomap_rviz_plugins

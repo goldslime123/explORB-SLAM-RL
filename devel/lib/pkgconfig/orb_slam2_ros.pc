@@ -1,0 +1,8 @@
+prefix=/home/kenji/ws/explORB-SLAM-RL/devel
+
+Name: orb_slam2_ros
+Description: Description of orb_slam2_ros
+Version: 0.0.1
+Cflags: -I/home/kenji/ws/explORB-SLAM-RL/devel/include
+Libs: -L${prefix}/lib 
+Requires: roscpp rospy std_msgs cv_bridge image_transport tf tf_conversions sensor_msgs dynamic_reconfigure message_runtime

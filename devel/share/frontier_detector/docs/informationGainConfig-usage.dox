@@ -1,0 +1,7 @@
+\subsubsection usage Usage
+\verbatim
+<node name="frontier_detector" pkg="frontier_detector" type="frontier_detector">
+  <param name="ig_threshold" type="double" value="0.5" />
+</node>
+\endverbatim
+
