@@ -14,7 +14,7 @@ Citation
 
 Placed, J. A., Gómez-Rodríguez, J. J., Tardós, J. D., & Castellanos, J. A. (2022). ExplORB-SLAM: Active Visual SLAM Exploiting the Pose-graph Topology. In 2022 Fifth Iberian Robotics Conference (ROBOT).
 
-Detected dependencies:
+Dependencies:
 ------------
 - Eigen
 - OpenCV
