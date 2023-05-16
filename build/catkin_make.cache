@@ -1,2 +1,2 @@
-3dParty/kobuki_plugins:3dParty/orb_slam_2_ros:3dParty/rrt_exploration-master:decision_maker:frontier_detector:robot_description
+3dParty/kobuki_plugins:3dParty/orb_slam_2_ros:decision_maker:frontier_detector:robot_description
 -DCATKIN_DEVEL_PREFIX=/home/kenji/ws/explORB-SLAM-RL/devel -DCMAKE_INSTALL_PREFIX=/home/kenji/ws/explORB-SLAM-RL/install -G Unix Makefiles

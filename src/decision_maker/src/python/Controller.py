@@ -171,6 +171,7 @@ def node():
 
     # Get ROS time in seconds
     t_0 = rospy.get_time()
+    rospy.loginfo("Current time t_0: %f ", t_0 )
 
     ig_changer = 0
 
@@ -181,6 +182,8 @@ def node():
 
         # Check temporal stopping criterion
         t_f = rospy.get_time() - t_0  # Get ROS time in seconds
+        rospy.loginfo("Current time t_f: %f ", t_f )
+
         if t_f >= exploring_time:
             robot_.cancelGoal()
             waitEnterKey()
@@ -296,13 +299,22 @@ def node():
                         centroid_record.append(centroids[ip])
 
                     winner_id = info_gain_record.index(np.max(info_gain_record))
-
                     info_centroid_record = dict(zip(info_gain_record, centroid_record))
-                    rospy.loginfo(rospy.get_name() + ": Infomataion gain: \n" + format(info_gain_record))
-                    rospy.loginfo(rospy.get_name() + ": Frontier locations: \n" + format(centroid_record))
-                    rospy.loginfo(rospy.get_name() + ": Map frontier/info gain: \n" + format(info_centroid_record)) 
+                    
+                    rospy.loginfo(rospy.get_name() + ": Frontiers: \n" + format(centroid_record))
+                    rospy.loginfo(rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
+
+                    rospy.loginfo(rospy.get_name() + ": Info gain/Frontier: \n" + format(info_centroid_record)) 
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to frontier " +
                                   format(centroid_record[winner_id]))
+                    
+                    # Get robot's current pose
+                    robot_position = robot_.getPose()[0]
+                    robot_orientation = robot_.getPose()[1]
+                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " position " +
+                                  format(robot_position))
+                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " orientation " +
+                                  format(robot_orientation))
 
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()

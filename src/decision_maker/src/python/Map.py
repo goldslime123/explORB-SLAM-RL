@@ -348,7 +348,7 @@ class Map:
         :return: numpy array of size 6x6, dict of vertices co-visible with the current one & no. of covisible points
         """
 
-        MIN_TH_COV_POINTS = 150
+        MIN_TH_COV_POINTS = 100
         MAX_TH_COV_POINTS = 400
 
         # Get all map points in camera's frustum

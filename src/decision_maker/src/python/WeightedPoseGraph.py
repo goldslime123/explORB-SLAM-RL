@@ -413,7 +413,7 @@ class WeightedPoseGraph:
             plan_nodes = np.ceil(n_points / self.th_plan_points)
             new_nodes = np.sort(np.random.choice(np.arange(1, n_points - 2), int(plan_nodes), replace=False))
             new_nodes = np.append(new_nodes, n_points-1)  # Add one last node at frontier's location
-
+            
             print("Hallucinate plan point: " + str(self.th_plan_points) + " Map points (n): " + str(n_points)  + " Planned nodes: " + str(int(plan_nodes)))
             rospy.loginfo(rospy.get_name() + ": Plan length " + format(n_points+1) + " generated " + format(plan_nodes)
                           + " new nodes with path ids: " + format(new_nodes.ravel()))

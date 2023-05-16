@@ -5,7 +5,6 @@
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.
 subdirs("gtest")
-subdirs("3dParty/rrt_exploration-master")
 subdirs("3dParty/orb_slam_2_ros")
 subdirs("decision_maker")
 subdirs("frontier_detector")
