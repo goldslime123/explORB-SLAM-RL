@@ -105,7 +105,7 @@ def createMarker(mtype: str = "point", frame: str = "/map", ns: str = "marker_ns
     marker.pose.orientation.x = 0.0
     marker.pose.orientation.y = 0.0
     marker.pose.orientation.z = 0.0
-    marker.pose.orientation.w = 1.0
+    marker.pose.orientation.w = 1.0 
 
     if mtype == "point":
         marker.type = Marker.POINTS

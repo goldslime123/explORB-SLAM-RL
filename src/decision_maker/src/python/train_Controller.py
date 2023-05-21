@@ -12,9 +12,20 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import rospy
 import tf
+import os
 import heapq
 import numpy as np
 import dynamic_reconfigure.client
+
+
+# import csv
+# from datetime import datetime
+# import sys
+# sys.path.append('/home/kenji/ws/explORB-SLAM-RL/src/decision_maker/src/python/train_script.py')
+# from file1 import shared_variable,shared_variable2
+
+
+from train_script import store_csv
 
 from numpy import array
 from copy import deepcopy
@@ -48,6 +59,7 @@ edges_ = []
 is_lost_ = False
 is_relocalizing_ = False
 goal_cancel_pub_ = rospy.Publisher('/robot_1/move_base/cancel', GoalID, queue_size=10)
+
 
 
 def mapPointsCallBack(data):
@@ -206,6 +218,7 @@ def node():
             n_centroids = len(centroids)
             if n_centroids <= 0:
                 rospy.logwarn_throttle(0.5, rospy.get_name() + ": No frontiers.")
+                # ending_cond= rospy.logwarn_throttle(0.5, rospy.get_name() + ": No frontiers.")
                 if ig_changer < 10:
                     ig_changer += 1
                 client = dynamic_reconfigure.client.Client("/frontier_detectors/filter")
@@ -289,6 +302,8 @@ def node():
                 elif single_goal:
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to " + format(centroids[0]))
                     robot_.sendGoal(centroids[0], True)
+                
+
                 elif len(info_gain) > 0:
                     # Select next best frontier
                     info_gain_record = []
@@ -315,6 +330,9 @@ def node():
                                   format(robot_position))
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " orientation " +
                                   format(robot_orientation))
+                    
+
+                    store_csv(robot_position,robot_orientation,centroid_record,info_gain_record)
 
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()

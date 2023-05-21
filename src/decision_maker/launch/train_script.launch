@@ -4,7 +4,7 @@
   <arg name="repeat_count"     value="repeat_count"/>
   <arg name="explore_time"        value="explore_time"/>
 
-  <node name="listener_node" pkg="decision_maker" type="script.py" output="screen">
+  <node name="listener_node" pkg="decision_maker" type="train_script.py" output="screen">
         <param name="repeat_count"       value="$(arg repeat_count)"/>
         <param name="explore_time"       value="$(arg explore_time)"/>
   </node>
