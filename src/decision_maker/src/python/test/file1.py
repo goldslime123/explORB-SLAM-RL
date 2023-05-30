@@ -2,11 +2,14 @@ shared_variable = "Hello, World!"
 shared_variable2 = "Hello, World!111"
 
 
+import uuid
+# Generate a unique number (UUID)
+unique_number = uuid.uuid4()
 
-def a():
-    print(shared_variable)
+# Shorten UUID to the first 7 letters
+shortened_number = str(unique_number)[:7]
+print(shortened_number)
 
 
-if __name__ == '__main__':
-    shared_variable ='aaa'
-    a()
+
+

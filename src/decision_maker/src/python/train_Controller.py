@@ -12,20 +12,10 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import rospy
 import tf
-import os
 import heapq
 import numpy as np
 import dynamic_reconfigure.client
 
-
-# import csv
-# from datetime import datetime
-# import sys
-# sys.path.append('/home/kenji/ws/explORB-SLAM-RL/src/decision_maker/src/python/train_script.py')
-# from file1 import shared_variable,shared_variable2
-
-
-from train_script import store_csv
 
 from numpy import array
 from copy import deepcopy
@@ -47,6 +37,11 @@ from Robot import Robot
 from Map import Map
 from WeightedPoseGraph import WeightedPoseGraph
 
+# libraries
+import os
+import csv
+import uuid
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Callbacks~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,8 +53,73 @@ edges_ = []
 
 is_lost_ = False
 is_relocalizing_ = False
-goal_cancel_pub_ = rospy.Publisher('/robot_1/move_base/cancel', GoalID, queue_size=10)
+goal_cancel_pub_ = rospy.Publisher(
+    '/robot_1/move_base/cancel', GoalID, queue_size=10)
 
+
+# Generate a unique number (UUID)
+unique_number = uuid.uuid4()
+
+# Shorten UUID to the first 7 letters
+shortened_number = str(unique_number)[:7]
+
+
+gazebo_env = 'aws_house'
+
+
+def does_row_exist(file_name, row_data):
+    with open(file_name, 'r', newline='') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if row == row_data:
+                return True  # Row exists in the CSV file
+    return False
+
+
+def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record):
+    csv_folder_path = '/home/kenji/ws/explORB-SLAM-RL/src/decision_maker/csv'
+    folder_path = csv_folder_path + '/' + gazebo_env
+    file_name = folder_path+'/'+str(shortened_number)+'.csv'
+
+    if os.path.exists(folder_path):
+        print("The folder exists.")
+
+        if os.path.exists(file_name):
+            print(f"The file '{file_name}' exists.")
+
+            with open(file_name, 'a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(
+                    [robot_position, robot_orientation, centroid_record, info_gain_record])
+
+        else:
+
+            print(f"The file '{file_name}' does not exist. Creating file.")
+            with open(file_name, 'a', newline='') as file:
+                writer = csv.writer(file)
+                row_data = ['robot_position', 'robot_orientation',
+                            'centroid_record', 'info_gain_record']
+
+                if does_row_exist(file_name, row_data):
+
+                    writer.writerows(
+                        [robot_position, robot_orientation, centroid_record, info_gain_record])
+                else:
+                    writer.writerow(['robot_position', 'robot_orientation',
+                                     'centroid_record', 'info_gain_record'])
+                    writer.writerows(
+                        [robot_position, robot_orientation, centroid_record, info_gain_record])
+    else:
+        print("The folder does not exist.")
+        os.makedirs(folder_path, exist_ok=True)
+        print(f"Folder '{folder_path}' created successfully.")
+
+        with open(file_name, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['robot_position', 'robot_orientation',
+                            'centroid_record', 'info_gain_record'])
+            writer.writerows([robot_position, robot_orientation,
+                             centroid_record, info_gain_record])
 
 
 def mapPointsCallBack(data):
@@ -116,8 +176,10 @@ def statusCallBack(data):
             msg = GoalID()
             goal_cancel_pub_.publish(msg)
             is_relocalizing_ = False
-            rospy.loginfo(rospy.get_name() + ': ORB-SLAM re localized successfully.')
-    elif data.state == 5 and not is_relocalizing_:  # If lost, cancel current goal and send best re localization goal
+            rospy.loginfo(rospy.get_name() +
+                          ': ORB-SLAM re localized successfully.')
+    # If lost, cancel current goal and send best re localization goal
+    elif data.state == 5 and not is_relocalizing_:
         # Empty stamp, empty ID -> cancels ALL goals.
         # https://wiki.ros.org/actionlib/DetailedDescription
         msg = GoalID()
@@ -128,7 +190,8 @@ def statusCallBack(data):
     elif data.state == 0:  # Stop robot
         msg = GoalID()
         goal_cancel_pub_.publish(msg)
-        rospy.logwarn_throttle(1, rospy.get_name() + ': ORB-SLAM status is UNKNOWN. Robot stopped.')
+        rospy.logwarn_throttle(1, rospy.get_name() +
+                               ': ORB-SLAM status is UNKNOWN. Robot stopped.')
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,18 +219,24 @@ def node():
 
     rospy.Subscriber(map_topic, OccupancyGrid, mapCallBack)
     rospy.Subscriber(frontiers_topic, PointArray, frontiersCallBack)
-    rospy.Subscriber("/orb_slam2_" + camera_type + "/info/state", ORBState, statusCallBack)
+    rospy.Subscriber("/orb_slam2_" + camera_type +
+                     "/info/state", ORBState, statusCallBack)
 
-    rospy.Subscriber("/orb_slam2_" + camera_type + "/vertex_list", Float64MultiArray, vertexCallBack)
-    rospy.Subscriber("/orb_slam2_" + camera_type + "/edge_list", Float64MultiArray, edgesCallBack)
-    rospy.Subscriber("/orb_slam2_" + camera_type + "/point_list", Float64MultiArray, mapPointsCallBack)
+    rospy.Subscriber("/orb_slam2_" + camera_type +
+                     "/vertex_list", Float64MultiArray, vertexCallBack)
+    rospy.Subscriber("/orb_slam2_" + camera_type +
+                     "/edge_list", Float64MultiArray, edgesCallBack)
+    rospy.Subscriber("/orb_slam2_" + camera_type + "/point_list",
+                     Float64MultiArray, mapPointsCallBack)
 
     if show_debug_path:
-        marker_hallucinated_path_pub_ = rospy.Publisher('marker_hallucinated_path', MarkerArray, queue_size=10)
+        marker_hallucinated_path_pub_ = rospy.Publisher(
+            'marker_hallucinated_path', MarkerArray, queue_size=10)
         """
         point_cloud2_map_pub_ = rospy.Publisher("marker_points_frustum", PointCloud2, queue_size=1)
         """
-        marker_hallucinated_graph_pub_ = rospy.Publisher('marker_hallucinated_graph', MarkerArray, queue_size=10)
+        marker_hallucinated_graph_pub_ = rospy.Publisher(
+            'marker_hallucinated_graph', MarkerArray, queue_size=10)
 
     # Wait if map is not received yet
     while len(gridMap_data_.data) < 1:
@@ -183,7 +252,7 @@ def node():
 
     # Get ROS time in seconds
     t_0 = rospy.get_time()
-    rospy.loginfo("Current time t_0: %f ", t_0 )
+    rospy.loginfo("Current time t_0: %f ", t_0)
 
     ig_changer = 0
 
@@ -194,7 +263,7 @@ def node():
 
         # Check temporal stopping criterion
         t_f = rospy.get_time() - t_0  # Get ROS time in seconds
-        rospy.loginfo("Current time t_f: %f ", t_f )
+        rospy.loginfo("Current time t_f: %f ", t_f)
 
         if t_f >= exploring_time:
             robot_.cancelGoal()
@@ -209,7 +278,8 @@ def node():
                 map_.setCameraBaseTf(t_camera_base, q_camera_base)
                 cond = 1
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                rospy.logerr(rospy.get_name() + ": Could not get TF from base to camera link.")
+                rospy.logerr(rospy.get_name() +
+                             ": Could not get TF from base to camera link.")
                 cond = 0
 
         if not is_lost_:  # ORB-SLAM OK
@@ -217,11 +287,13 @@ def node():
 
             n_centroids = len(centroids)
             if n_centroids <= 0:
-                rospy.logwarn_throttle(0.5, rospy.get_name() + ": No frontiers.")
+                rospy.logwarn_throttle(
+                    0.5, rospy.get_name() + ": No frontiers.")
                 # ending_cond= rospy.logwarn_throttle(0.5, rospy.get_name() + ": No frontiers.")
                 if ig_changer < 10:
                     ig_changer += 1
-                client = dynamic_reconfigure.client.Client("/frontier_detectors/filter")
+                client = dynamic_reconfigure.client.Client(
+                    "/frontier_detectors/filter")
                 if ig_changer > 10 and client.get_configuration(timeout=1)["ig_threshold"] != 0.1:
                     client.update_configuration({"ig_threshold": 0.1})
             else:
@@ -239,7 +311,8 @@ def node():
                 n = float(G.getNNodes())
                 m = float(G.getNEdges())
                 if n < 1:
-                    G.graph.add_node(int(0), translation=[0, 0, 0], orientation=[0, 0, 0, 0])
+                    G.graph.add_node(int(0), translation=[
+                                     0, 0, 0], orientation=[0, 0, 0, 0])
 
                 info_gain = []
                 closer_goal = False
@@ -247,17 +320,21 @@ def node():
 
                 # If only one frontier no need to evaluate anything. Select that frontier
                 if n_centroids == 1:
-                    rospy.logwarn(rospy.get_name() + ": Only one frontier detected. Selecting it.")
+                    rospy.logwarn(rospy.get_name() +
+                                  ": Only one frontier detected. Selecting it.")
                     single_goal = True
                 # If no edges (starting step) do not evaluate D-opt. Select random frontier
                 elif m < 1:
-                    rospy.logwarn(rospy.get_name() + ": Graph not started yet, m < 1. Selecting goal +=[0.1,0.1].")
+                    rospy.logwarn(rospy.get_name(
+                    ) + ": Graph not started yet, m < 1. Selecting goal +=[0.1,0.1].")
                     closer_goal = True
                 else:  # Otherwise
-                    rospy.loginfo(rospy.get_name() + ": Computing information gain of every frontier candidate.")
+                    rospy.loginfo(
+                        rospy.get_name() + ": Computing information gain of every frontier candidate.")
                     for ip in range(0, n_centroids):
                         # Get frontier goal
-                        p_frontier = np.array([centroids[ip][0], centroids[ip][1]])
+                        p_frontier = np.array(
+                            [centroids[ip][0], centroids[ip][1]])
 
                         # Compute hallucinated pose graph
                         if show_debug_path:
@@ -269,12 +346,15 @@ def node():
                                                                        gridMap_data_.info.origin.position.y,
                                                                        p_frontier[0], p_frontier[1], 0.5)
                             else:
-                                seen_cells_pct = cellInformation(gridMap_data_, p_frontier, 0.5)
+                                seen_cells_pct = cellInformation(
+                                    gridMap_data_, p_frontier, 0.5)
 
                             hallucinated_path, G_frontier = G.hallucinateGraph(robot_, map_, seen_cells_pct, p_frontier,
                                                                                True)
-                            marker_hallucinated_path_pub_.publish(hallucinated_path)
-                            marker_hallucinated_graph_pub_.publish(G_frontier.getGraphAsMarkerArray(color=False))
+                            marker_hallucinated_path_pub_.publish(
+                                hallucinated_path)
+                            marker_hallucinated_graph_pub_.publish(
+                                G_frontier.getGraphAsMarkerArray(color=False))
                             # waitEnterKey()
                             """
                             visualizing_pts = map_.getMapPointsAsROSPointCloud2()
@@ -284,25 +364,28 @@ def node():
                             waitEnterKey()
                             """
                         else:
-                            G_frontier = G.hallucinateGraph(robot_, map_, p_frontier, False)
+                            G_frontier = G.hallucinateGraph(
+                                robot_, map_, p_frontier, False)
 
                         # Compute no. of spanning trees <=> D-opt(FIM)
                         n_frontier = float(G_frontier.getNNodes())
                         if n_frontier > 0:
                             L_anchored = G_frontier.computeAnchoredL()
                             _, t = np.linalg.slogdet(L_anchored.todense())
-                            n_spanning_trees = n_frontier ** (1 / n_frontier) * np.exp(t / n_frontier)
+                            n_spanning_trees = n_frontier ** (
+                                1 / n_frontier) * np.exp(t / n_frontier)
                             info_gain.append(n_spanning_trees)
 
                 # Goal sender
                 if robot_.getState() == 1:
-                    rospy.logwarn(rospy.get_name() + ": Robot is not available.")
+                    rospy.logwarn(rospy.get_name() +
+                                  ": Robot is not available.")
                 elif closer_goal:
                     robot_.sendGoal(robot_.getPosition() + [0.1, 0.1], True)
                 elif single_goal:
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to " + format(centroids[0]))
+                    rospy.loginfo(rospy.get_name(
+                    ) + ": " + format(robot_name) + " assigned to " + format(centroids[0]))
                     robot_.sendGoal(centroids[0], True)
-                
 
                 elif len(info_gain) > 0:
                     # Select next best frontier
@@ -313,16 +396,21 @@ def node():
                         info_gain_record.append(info_gain[ip])
                         centroid_record.append(centroids[ip])
 
-                    winner_id = info_gain_record.index(np.max(info_gain_record))
-                    info_centroid_record = dict(zip(info_gain_record, centroid_record))
-                    
-                    rospy.loginfo(rospy.get_name() + ": Frontiers: \n" + format(centroid_record))
-                    rospy.loginfo(rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
+                    winner_id = info_gain_record.index(
+                        np.max(info_gain_record))
+                    info_centroid_record = dict(
+                        zip(info_gain_record, centroid_record))
 
-                    rospy.loginfo(rospy.get_name() + ": Info gain/Frontier: \n" + format(info_centroid_record)) 
+                    rospy.loginfo(rospy.get_name() +
+                                  ": Frontiers: \n" + format(centroid_record))
+                    rospy.loginfo(
+                        rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
+
+                    rospy.loginfo(
+                        rospy.get_name() + ": Info gain/Frontier: \n" + format(info_centroid_record))
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to frontier " +
                                   format(centroid_record[winner_id]))
-                    
+
                     # Get robot's current pose
                     robot_position = robot_.getPose()[0]
                     robot_orientation = robot_.getPose()[1]
@@ -330,9 +418,9 @@ def node():
                                   format(robot_position))
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " orientation " +
                                   format(robot_orientation))
-                    
 
-                    store_csv(robot_position,robot_orientation,centroid_record,info_gain_record)
+                    store_csv(robot_position, robot_orientation,
+                              centroid_record, info_gain_record)
 
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
@@ -340,16 +428,19 @@ def node():
 
                     # If plan fails near to starting position, send new goal to the next best frontier
                     if robot_.getState() != 3:
-                        euclidean_d = np.linalg.norm(robot_.getPosition() - initial_plan_position)
+                        euclidean_d = np.linalg.norm(
+                            robot_.getPosition() - initial_plan_position)
                         if euclidean_d <= 2.0:
                             new_goal = 2
                             while robot_.getState() != 3 and new_goal <= len(info_gain_record):
-                                second_max = heapq.nlargest(new_goal, info_gain_record)[1]
+                                second_max = heapq.nlargest(
+                                    new_goal, info_gain_record)[1]
                                 winner_id = info_gain_record.index(second_max)
                                 rospy.logwarn(rospy.get_name() + ": Goal aborted near previous pose (eucl = " +
                                               str(euclidean_d) + "). Sending new goal to: " +
                                               str(centroid_record[winner_id]))
-                                robot_.sendGoal(centroid_record[winner_id], True)
+                                robot_.sendGoal(
+                                    centroid_record[winner_id], True)
                                 new_goal = new_goal + 1
 
                         else:
@@ -359,12 +450,15 @@ def node():
         else:  # ORB-SLAM lost
             is_relocalizing_ = True
             while is_lost_:
-                best_reloc_poses = map_.getBestRelocPoses(robot_.getPoseAsGeometryMsg())
-                rospy.logwarn(rospy.get_name() + ": ORB-SLAM lost. Sending robot to best re localization pose.")
+                best_reloc_poses = map_.getBestRelocPoses(
+                    robot_.getPoseAsGeometryMsg())
+                rospy.logwarn(rospy.get_name(
+                ) + ": ORB-SLAM lost. Sending robot to best re localization pose.")
                 for reloc_poses in best_reloc_poses:
                     _, _, reloc_yaw = quaternion2euler(reloc_poses.orientation.w, reloc_poses.orientation.x,
                                                        reloc_poses.orientation.y, reloc_poses.orientation.z)
-                    reloc_position = [reloc_poses.position.x, reloc_poses.position.y]
+                    reloc_position = [
+                        reloc_poses.position.x, reloc_poses.position.y]
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to [" +
                                   format(reloc_position) + ", " + format(reloc_yaw * 180 / 3.14159) + "]")
                     robot_.sendGoalAsPose(reloc_poses, True)
@@ -381,5 +475,6 @@ def node():
 if __name__ == '__main__':
     try:
         node()
+
     except rospy.ROSInterruptException:
         pass
