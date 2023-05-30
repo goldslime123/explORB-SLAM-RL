@@ -63,7 +63,6 @@ unique_number = uuid.uuid4()
 # Shorten UUID to the first 7 letters
 shortened_number = str(unique_number)[:7]
 
-
 gazebo_env = 'aws_house'
 
 
@@ -76,50 +75,48 @@ def does_row_exist(file_name, row_data):
     return False
 
 
-def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record):
+def store_csv(robot_position, robot_orientation, centroid_str, info_gain_record):
     csv_folder_path = '/home/kenji/ws/explORB-SLAM-RL/src/decision_maker/csv'
     folder_path = csv_folder_path + '/' + gazebo_env
     file_name = folder_path+'/'+str(shortened_number)+'.csv'
+
+    row_data = ['robot_position', 'robot_orientation',
+                'centroid_record', 'info_gain_record']
+    
+    print(type(centroid_str))
 
     if os.path.exists(folder_path):
         print("The folder exists.")
 
         if os.path.exists(file_name):
             print(f"The file '{file_name}' exists.")
-
             with open(file_name, 'a', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerows(
-                    [robot_position, robot_orientation, centroid_record, info_gain_record])
-
-        else:
-
-            print(f"The file '{file_name}' does not exist. Creating file.")
-            with open(file_name, 'a', newline='') as file:
-                writer = csv.writer(file)
-                row_data = ['robot_position', 'robot_orientation',
-                            'centroid_record', 'info_gain_record']
-
                 if does_row_exist(file_name, row_data):
-
                     writer.writerows(
-                        [robot_position, robot_orientation, centroid_record, info_gain_record])
+                        [robot_position, robot_orientation, centroid_str, info_gain_record])
                 else:
                     writer.writerow(['robot_position', 'robot_orientation',
                                      'centroid_record', 'info_gain_record'])
                     writer.writerows(
-                        [robot_position, robot_orientation, centroid_record, info_gain_record])
+                        [robot_position, robot_orientation, centroid_str, info_gain_record])
+
+        else:
+            print(f"The file '{file_name}' does not exist. Creating file.")
+            with open(file_name, 'a', newline='') as file:
+                writer = csv.writer(file)
+                if does_row_exist(file_name, row_data):
+                    writer.writerows(
+                        [robot_position, robot_orientation, centroid_str, info_gain_record])
+                else:
+                    writer.writerow(['robot_position', 'robot_orientation',
+                                     'centroid_record', 'info_gain_record'])
+                    writer.writerows(
+                        [robot_position, robot_orientation, centroid_str, info_gain_record])
     else:
         print("The folder does not exist.")
         os.makedirs(folder_path, exist_ok=True)
         print(f"Folder '{folder_path}' created successfully.")
-
-        with open(file_name, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(['robot_position', 'robot_orientation',
-                            'centroid_record', 'info_gain_record'])
-            writer.writerows([robot_position, robot_orientation,
-                             centroid_record, info_gain_record])
 
 
 def mapPointsCallBack(data):
@@ -418,13 +415,43 @@ def node():
                                   format(robot_position))
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " orientation " +
                                   format(robot_orientation))
+                    
+                    import re
+                    centroid_str=str(centroid_record)
+                    # Remove the word "array" from the string
+                    centroid_str = centroid_str.replace('array', '')
+                    # Remove all parentheses from the string
+                    centroid_str = centroid_str.replace('(', '').replace(')', '')
+                    # Remove the first and last brackets from the string
+                    centroid_str = centroid_str[1:-1]
+
+                    # Remove all empty spaces in the string
+                    centroid_str = centroid_str.replace(" ", "")
+
+            
+
+                    
+                    # Remove the surrounding brackets from the string
+                    centroid_str = centroid_str.strip('[]')
+
+                    # Split the string into individual coordinate pairs
+                    centroid_str = centroid_str.split('],[')
+
+                    # Process each pair to create the list of lists
+                    centroid_str = [list(map(float, pair.split(','))) for pair in centroid_str]
+
+                    print("Centroid str",centroid_str)
+
 
                     store_csv(robot_position, robot_orientation,
-                              centroid_record, info_gain_record)
+                              centroid_str, info_gain_record)
+                    
+                    print(centroid_record[winner_id])
 
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
                     robot_.sendGoal(centroid_record[winner_id], True)
+                    # robot_.sendGoal([2 ,2], True)
 
                     # If plan fails near to starting position, send new goal to the next best frontier
                     if robot_.getState() != 3:

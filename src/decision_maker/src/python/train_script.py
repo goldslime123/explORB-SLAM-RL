@@ -89,7 +89,7 @@ class ActiveSLAM:
 
 def initialize_active_slam():
     # Initialize the ActiveSLAM object
-    repeat_count = 2
+    repeat_count = 1
     explore_time = 50
     decision_maker = 'train_autonomous_agent'
     gazebo_env = 'aws_house'
