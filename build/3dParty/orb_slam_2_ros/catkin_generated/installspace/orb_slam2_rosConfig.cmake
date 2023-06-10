@@ -67,14 +67,14 @@ set(orb_slam2_ros_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(orb_slam2_ros_SOURCE_PREFIX /home/kenji/ws/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros)
-  set(orb_slam2_ros_DEVEL_PREFIX /home/kenji/ws/explORB-SLAM-RL/devel)
+  set(orb_slam2_ros_SOURCE_PREFIX /home/kenji_leong/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros)
+  set(orb_slam2_ros_DEVEL_PREFIX /home/kenji_leong/explORB-SLAM-RL/devel)
   set(orb_slam2_ros_INSTALL_PREFIX "")
   set(orb_slam2_ros_PREFIX ${orb_slam2_ros_DEVEL_PREFIX})
 else()
   set(orb_slam2_ros_SOURCE_PREFIX "")
   set(orb_slam2_ros_DEVEL_PREFIX "")
-  set(orb_slam2_ros_INSTALL_PREFIX /home/kenji/ws/explORB-SLAM-RL/install)
+  set(orb_slam2_ros_INSTALL_PREFIX /home/kenji_leong/explORB-SLAM-RL/install)
   set(orb_slam2_ros_PREFIX ${orb_slam2_ros_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/kenji/ws/explORB-SLAM-RL/install/lib;/opt/ros/noetic/lib)
+    foreach(path /home/kenji_leong/explORB-SLAM-RL/install/lib;/home/kenji_leong/explORB-SLAM-RL/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

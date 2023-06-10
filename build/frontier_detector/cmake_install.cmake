@@ -1,8 +1,8 @@
-# Install script for directory: /home/kenji/ws/explORB-SLAM-RL/src/frontier_detector
+# Install script for directory: /home/kenji_leong/explORB-SLAM-RL/src/frontier_detector
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/kenji/ws/explORB-SLAM-RL/install")
+  set(CMAKE_INSTALL_PREFIX "/home/kenji_leong/explORB-SLAM-RL/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,69 +38,69 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector/msg" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/src/frontier_detector/msg/PointArray.msg")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector/msg" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/src/frontier_detector/msg/PointArray.msg")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector/cmake" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detector-msg-paths.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector/cmake" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detector-msg-paths.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/kenji/ws/explORB-SLAM-RL/devel/include/frontier_detector")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/kenji_leong/explORB-SLAM-RL/devel/include/frontier_detector")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/kenji/ws/explORB-SLAM-RL/devel/share/roseus/ros/frontier_detector")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/kenji_leong/explORB-SLAM-RL/devel/share/roseus/ros/frontier_detector")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/kenji/ws/explORB-SLAM-RL/devel/share/common-lisp/ros/frontier_detector")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/kenji_leong/explORB-SLAM-RL/devel/share/common-lisp/ros/frontier_detector")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/kenji/ws/explORB-SLAM-RL/devel/share/gennodejs/ros/frontier_detector")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/kenji_leong/explORB-SLAM-RL/devel/share/gennodejs/ros/frontier_detector")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  execute_process(COMMAND "/usr/bin/python3" -m compileall "/home/kenji/ws/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector")
+  execute_process(COMMAND "/usr/bin/python3" -m compileall "/home/kenji_leong/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages" TYPE DIRECTORY FILES "/home/kenji/ws/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages" TYPE DIRECTORY FILES "/home/kenji_leong/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/frontier_detector" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/devel/include/frontier_detector/informationGainConfig.h")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/frontier_detector" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/devel/include/frontier_detector/informationGainConfig.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages/frontier_detector" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/__init__.py")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages/frontier_detector" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/__init__.py")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  execute_process(COMMAND "/usr/bin/python3" -m compileall "/home/kenji/ws/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/cfg")
+  execute_process(COMMAND "/usr/bin/python3" -m compileall "/home/kenji_leong/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/cfg")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages/frontier_detector" TYPE DIRECTORY FILES "/home/kenji/ws/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/cfg")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages/frontier_detector" TYPE DIRECTORY FILES "/home/kenji_leong/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/cfg")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detector.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detector.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector/cmake" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detector-msg-extras.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector/cmake" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detector-msg-extras.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector/cmake" TYPE FILE FILES
-    "/home/kenji/ws/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detectorConfig.cmake"
-    "/home/kenji/ws/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detectorConfig-version.cmake"
+    "/home/kenji_leong/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detectorConfig.cmake"
+    "/home/kenji_leong/explORB-SLAM-RL/build/frontier_detector/catkin_generated/installspace/frontier_detectorConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/src/frontier_detector/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/frontier_detector" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/src/frontier_detector/package.xml")
 endif()
 

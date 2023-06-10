@@ -5,8 +5,6 @@ import subprocess
 import time
 import rospy
 import signal
-import csv
-import os
 
 class ActiveSLAM:
     def __init__(self, repeat_count, explore_time, decision_maker, gazebo_env):
@@ -76,7 +74,6 @@ class ActiveSLAM:
 
             for x in range(1, self.repeat_count+1):
                 print(f'Launching the ROS launch file (attempt {x})...')
-                self.attempt_counter = x
 
                 self.roslaunch_gazebo_decision_maker()
                 time.sleep(self.explore_time)
@@ -90,7 +87,7 @@ class ActiveSLAM:
 def initialize_active_slam():
     # Initialize the ActiveSLAM object
     repeat_count = 1
-    explore_time = 50
+    explore_time = 100
     decision_maker = 'train_autonomous_agent'
     gazebo_env = 'aws_house'
     active_slam = ActiveSLAM(repeat_count, explore_time, decision_maker, gazebo_env)

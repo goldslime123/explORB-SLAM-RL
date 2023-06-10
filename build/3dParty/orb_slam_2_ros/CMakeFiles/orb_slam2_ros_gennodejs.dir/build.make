@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kenji/ws/explORB-SLAM-RL/src
+CMAKE_SOURCE_DIR = /home/kenji_leong/explORB-SLAM-RL/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kenji/ws/explORB-SLAM-RL/build
+CMAKE_BINARY_DIR = /home/kenji_leong/explORB-SLAM-RL/build
 
 # Utility rule file for orb_slam2_ros_gennodejs.
 
@@ -63,10 +63,10 @@ orb_slam2_ros_gennodejs: 3dParty/orb_slam_2_ros/CMakeFiles/orb_slam2_ros_gennode
 .PHONY : 3dParty/orb_slam_2_ros/CMakeFiles/orb_slam2_ros_gennodejs.dir/build
 
 3dParty/orb_slam_2_ros/CMakeFiles/orb_slam2_ros_gennodejs.dir/clean:
-	cd /home/kenji/ws/explORB-SLAM-RL/build/3dParty/orb_slam_2_ros && $(CMAKE_COMMAND) -P CMakeFiles/orb_slam2_ros_gennodejs.dir/cmake_clean.cmake
+	cd /home/kenji_leong/explORB-SLAM-RL/build/3dParty/orb_slam_2_ros && $(CMAKE_COMMAND) -P CMakeFiles/orb_slam2_ros_gennodejs.dir/cmake_clean.cmake
 .PHONY : 3dParty/orb_slam_2_ros/CMakeFiles/orb_slam2_ros_gennodejs.dir/clean
 
 3dParty/orb_slam_2_ros/CMakeFiles/orb_slam2_ros_gennodejs.dir/depend:
-	cd /home/kenji/ws/explORB-SLAM-RL/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenji/ws/explORB-SLAM-RL/src /home/kenji/ws/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros /home/kenji/ws/explORB-SLAM-RL/build /home/kenji/ws/explORB-SLAM-RL/build/3dParty/orb_slam_2_ros /home/kenji/ws/explORB-SLAM-RL/build/3dParty/orb_slam_2_ros/CMakeFiles/orb_slam2_ros_gennodejs.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/kenji_leong/explORB-SLAM-RL/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenji_leong/explORB-SLAM-RL/src /home/kenji_leong/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros /home/kenji_leong/explORB-SLAM-RL/build /home/kenji_leong/explORB-SLAM-RL/build/3dParty/orb_slam_2_ros /home/kenji_leong/explORB-SLAM-RL/build/3dParty/orb_slam_2_ros/CMakeFiles/orb_slam2_ros_gennodejs.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : 3dParty/orb_slam_2_ros/CMakeFiles/orb_slam2_ros_gennodejs.dir/depend
 

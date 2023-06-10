@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/Thirdparty/g2o/lib/libg2o.pdb"
-  "/home/kenji/ws/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/Thirdparty/g2o/lib/libg2o.so"
+  "/home/kenji_leong/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/Thirdparty/g2o/lib/libg2o.pdb"
+  "/home/kenji_leong/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/Thirdparty/g2o/lib/libg2o.so"
   "CMakeFiles/g2o.dir/orb_slam2/Thirdparty/g2o/g2o/core/batch_stats.cpp.o"
   "CMakeFiles/g2o.dir/orb_slam2/Thirdparty/g2o/g2o/core/cache.cpp.o"
   "CMakeFiles/g2o.dir/orb_slam2/Thirdparty/g2o/g2o/core/estimate_propagator.cpp.o"

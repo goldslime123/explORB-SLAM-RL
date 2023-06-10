@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/orb_slam2_ros/orb_slam2_ros_rgbd"
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/orb_slam2_ros/orb_slam2_ros_rgbd.pdb"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/orb_slam2_ros/orb_slam2_ros_rgbd"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/orb_slam2_ros/orb_slam2_ros_rgbd.pdb"
   "CMakeFiles/orb_slam2_ros_rgbd.dir/ros/src/Node.cc.o"
   "CMakeFiles/orb_slam2_ros_rgbd.dir/ros/src/RGBDNode.cc.o"
 )

@@ -1,4 +1,4 @@
-prefix=/home/kenji/ws/explORB-SLAM-RL/install
+prefix=/home/kenji_leong/explORB-SLAM-RL/install
 
 Name: robot_description
 Description: Description of robot_description

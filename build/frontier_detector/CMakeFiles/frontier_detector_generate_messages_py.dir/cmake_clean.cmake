@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/msg/_PointArray.py"
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/msg/__init__.py"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/msg/_PointArray.py"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/python3/dist-packages/frontier_detector/msg/__init__.py"
   "CMakeFiles/frontier_detector_generate_messages_py"
 )
 

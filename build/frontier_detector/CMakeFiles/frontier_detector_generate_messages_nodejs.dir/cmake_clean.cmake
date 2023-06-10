@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/devel/share/gennodejs/ros/frontier_detector/msg/PointArray.js"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/share/gennodejs/ros/frontier_detector/msg/PointArray.js"
   "CMakeFiles/frontier_detector_generate_messages_nodejs"
 )
 

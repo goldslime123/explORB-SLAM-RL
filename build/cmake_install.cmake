@@ -1,8 +1,8 @@
-# Install script for directory: /home/kenji/ws/explORB-SLAM-RL/src
+# Install script for directory: /home/kenji_leong/explORB-SLAM-RL/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/kenji/ws/explORB-SLAM-RL/install")
+  set(CMAKE_INSTALL_PREFIX "/home/kenji_leong/explORB-SLAM-RL/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -49,93 +49,93 @@ endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/kenji/ws/explORB-SLAM-RL/install/_setup_util.py")
+   "/home/kenji_leong/explORB-SLAM-RL/install/_setup_util.py")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/kenji/ws/explORB-SLAM-RL/install" TYPE PROGRAM FILES "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/_setup_util.py")
+file(INSTALL DESTINATION "/home/kenji_leong/explORB-SLAM-RL/install" TYPE PROGRAM FILES "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/_setup_util.py")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/kenji/ws/explORB-SLAM-RL/install/env.sh")
+   "/home/kenji_leong/explORB-SLAM-RL/install/env.sh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/kenji/ws/explORB-SLAM-RL/install" TYPE PROGRAM FILES "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/env.sh")
+file(INSTALL DESTINATION "/home/kenji_leong/explORB-SLAM-RL/install" TYPE PROGRAM FILES "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/env.sh")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/kenji/ws/explORB-SLAM-RL/install/setup.bash;/home/kenji/ws/explORB-SLAM-RL/install/local_setup.bash")
+   "/home/kenji_leong/explORB-SLAM-RL/install/setup.bash;/home/kenji_leong/explORB-SLAM-RL/install/local_setup.bash")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/kenji/ws/explORB-SLAM-RL/install" TYPE FILE FILES
-    "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/setup.bash"
-    "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/local_setup.bash"
+file(INSTALL DESTINATION "/home/kenji_leong/explORB-SLAM-RL/install" TYPE FILE FILES
+    "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/setup.bash"
+    "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/local_setup.bash"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/kenji/ws/explORB-SLAM-RL/install/setup.sh;/home/kenji/ws/explORB-SLAM-RL/install/local_setup.sh")
+   "/home/kenji_leong/explORB-SLAM-RL/install/setup.sh;/home/kenji_leong/explORB-SLAM-RL/install/local_setup.sh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/kenji/ws/explORB-SLAM-RL/install" TYPE FILE FILES
-    "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/setup.sh"
-    "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/local_setup.sh"
+file(INSTALL DESTINATION "/home/kenji_leong/explORB-SLAM-RL/install" TYPE FILE FILES
+    "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/setup.sh"
+    "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/local_setup.sh"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/kenji/ws/explORB-SLAM-RL/install/setup.zsh;/home/kenji/ws/explORB-SLAM-RL/install/local_setup.zsh")
+   "/home/kenji_leong/explORB-SLAM-RL/install/setup.zsh;/home/kenji_leong/explORB-SLAM-RL/install/local_setup.zsh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/kenji/ws/explORB-SLAM-RL/install" TYPE FILE FILES
-    "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/setup.zsh"
-    "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/local_setup.zsh"
+file(INSTALL DESTINATION "/home/kenji_leong/explORB-SLAM-RL/install" TYPE FILE FILES
+    "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/setup.zsh"
+    "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/local_setup.zsh"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/kenji/ws/explORB-SLAM-RL/install/.rosinstall")
+   "/home/kenji_leong/explORB-SLAM-RL/install/.rosinstall")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/kenji/ws/explORB-SLAM-RL/install" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/build/catkin_generated/installspace/.rosinstall")
+file(INSTALL DESTINATION "/home/kenji_leong/explORB-SLAM-RL/install" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/build/catkin_generated/installspace/.rosinstall")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/kenji/ws/explORB-SLAM-RL/build/gtest/cmake_install.cmake")
-  include("/home/kenji/ws/explORB-SLAM-RL/build/3dParty/orb_slam_2_ros/cmake_install.cmake")
-  include("/home/kenji/ws/explORB-SLAM-RL/build/decision_maker/cmake_install.cmake")
-  include("/home/kenji/ws/explORB-SLAM-RL/build/frontier_detector/cmake_install.cmake")
-  include("/home/kenji/ws/explORB-SLAM-RL/build/3dParty/kobuki_plugins/cmake_install.cmake")
-  include("/home/kenji/ws/explORB-SLAM-RL/build/robot_description/cmake_install.cmake")
+  include("/home/kenji_leong/explORB-SLAM-RL/build/gtest/cmake_install.cmake")
+  include("/home/kenji_leong/explORB-SLAM-RL/build/3dParty/orb_slam_2_ros/cmake_install.cmake")
+  include("/home/kenji_leong/explORB-SLAM-RL/build/decision_maker/cmake_install.cmake")
+  include("/home/kenji_leong/explORB-SLAM-RL/build/frontier_detector/cmake_install.cmake")
+  include("/home/kenji_leong/explORB-SLAM-RL/build/3dParty/kobuki_plugins/cmake_install.cmake")
+  include("/home/kenji_leong/explORB-SLAM-RL/build/robot_description/cmake_install.cmake")
 
 endif()
 
@@ -147,5 +147,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/kenji/ws/explORB-SLAM-RL/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/kenji_leong/explORB-SLAM-RL/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

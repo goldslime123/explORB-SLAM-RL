@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/devel/share/common-lisp/ros/frontier_detector/msg/PointArray.lisp"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/share/common-lisp/ros/frontier_detector/msg/PointArray.lisp"
   "CMakeFiles/frontier_detector_generate_messages_lisp"
 )
 

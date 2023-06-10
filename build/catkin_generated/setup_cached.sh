@@ -7,7 +7,7 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/kenji/ws/explORB-SLAM-RL/devel:$CMAKE_PREFIX_PATH"
-export PWD='/home/kenji/ws/explORB-SLAM-RL/build'
-export ROSLISP_PACKAGE_DIRECTORIES='/home/kenji/ws/explORB-SLAM-RL/devel/share/common-lisp'
-export ROS_PACKAGE_PATH="/home/kenji/ws/explORB-SLAM-RL/src:$ROS_PACKAGE_PATH"
+export LD_LIBRARY_PATH='/opt/ros/noetic/lib'
+export PKG_CONFIG_PATH='/opt/ros/noetic/lib/pkgconfig'
+export PWD='/home/kenji_leong/explORB-SLAM-RL/build'
+export PYTHONPATH='/opt/ros/noetic/lib/python3/dist-packages'

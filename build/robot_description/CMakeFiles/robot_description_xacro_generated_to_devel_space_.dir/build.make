@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kenji/ws/explORB-SLAM-RL/src
+CMAKE_SOURCE_DIR = /home/kenji_leong/explORB-SLAM-RL/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kenji/ws/explORB-SLAM-RL/build
+CMAKE_BINARY_DIR = /home/kenji_leong/explORB-SLAM-RL/build
 
 # Utility rule file for robot_description_xacro_generated_to_devel_space_.
 
@@ -63,10 +63,10 @@ robot_description/CMakeFiles/robot_description_xacro_generated_to_devel_space_.d
 .PHONY : robot_description/CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/build
 
 robot_description/CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/clean:
-	cd /home/kenji/ws/explORB-SLAM-RL/build/robot_description && $(CMAKE_COMMAND) -P CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/cmake_clean.cmake
+	cd /home/kenji_leong/explORB-SLAM-RL/build/robot_description && $(CMAKE_COMMAND) -P CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/cmake_clean.cmake
 .PHONY : robot_description/CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/clean
 
 robot_description/CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/depend:
-	cd /home/kenji/ws/explORB-SLAM-RL/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenji/ws/explORB-SLAM-RL/src /home/kenji/ws/explORB-SLAM-RL/src/robot_description /home/kenji/ws/explORB-SLAM-RL/build /home/kenji/ws/explORB-SLAM-RL/build/robot_description /home/kenji/ws/explORB-SLAM-RL/build/robot_description/CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/kenji_leong/explORB-SLAM-RL/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenji_leong/explORB-SLAM-RL/src /home/kenji_leong/explORB-SLAM-RL/src/robot_description /home/kenji_leong/explORB-SLAM-RL/build /home/kenji_leong/explORB-SLAM-RL/build/robot_description /home/kenji_leong/explORB-SLAM-RL/build/robot_description/CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : robot_description/CMakeFiles/robot_description_xacro_generated_to_devel_space_.dir/depend
 

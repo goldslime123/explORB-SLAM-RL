@@ -1,4 +1,4 @@
-prefix=/home/kenji/ws/explORB-SLAM-RL/install
+prefix=/home/kenji_leong/explORB-SLAM-RL/install
 
 Name: orb_slam2_ros
 Description: Description of orb_slam2_ros

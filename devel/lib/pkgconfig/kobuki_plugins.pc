@@ -1,8 +1,8 @@
-prefix=/home/kenji/ws/explORB-SLAM-RL/devel
+prefix=/home/kenji_leong/explORB-SLAM-RL/devel
 
 Name: kobuki_plugins
 Description: Description of kobuki_plugins
 Version: 0.5.7
-Cflags: -I/home/kenji/ws/explORB-SLAM-RL/src/3dParty/kobuki_plugins/include
+Cflags: -I/home/kenji_leong/explORB-SLAM-RL/src/3dParty/kobuki_plugins/include
 Libs: -L${prefix}/lib -lgazebo_ros_kobuki
 Requires: gazebo_ros gazebo_plugins geometry_msgs kobuki_msgs nav_msgs roscpp sensor_msgs std_msgs tf

@@ -1,4 +1,4 @@
-prefix=/home/kenji/ws/explORB-SLAM-RL/install
+prefix=/home/kenji_leong/explORB-SLAM-RL/install
 
 Name: frontier_detector
 Description: Description of frontier_detector

@@ -1,8 +1,8 @@
-prefix=/home/kenji/ws/explORB-SLAM-RL/devel
+prefix=/home/kenji_leong/explORB-SLAM-RL/devel
 
 Name: frontier_detector
 Description: Description of frontier_detector
 Version: 0.0.0
-Cflags: -I/home/kenji/ws/explORB-SLAM-RL/devel/include -I/home/kenji/ws/explORB-SLAM-RL/src/frontier_detector/include
+Cflags: -I/home/kenji_leong/explORB-SLAM-RL/devel/include -I/home/kenji_leong/explORB-SLAM-RL/src/frontier_detector/include
 Libs: -L${prefix}/lib 
 Requires: roscpp rospy std_msgs tf geometry_msgs nav_msgs visualization_msgs dynamic_reconfigure message_runtime octomap_ros

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/Thirdparty/DBoW2/lib/libDBoW2.pdb"
-  "/home/kenji/ws/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/Thirdparty/DBoW2/lib/libDBoW2.so"
+  "/home/kenji_leong/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/Thirdparty/DBoW2/lib/libDBoW2.pdb"
+  "/home/kenji_leong/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/Thirdparty/DBoW2/lib/libDBoW2.so"
   "CMakeFiles/DBoW2.dir/orb_slam2/Thirdparty/DBoW2/DBoW2/BowVector.cpp.o"
   "CMakeFiles/DBoW2.dir/orb_slam2/Thirdparty/DBoW2/DBoW2/FORB.cpp.o"
   "CMakeFiles/DBoW2.dir/orb_slam2/Thirdparty/DBoW2/DBoW2/FeatureVector.cpp.o"

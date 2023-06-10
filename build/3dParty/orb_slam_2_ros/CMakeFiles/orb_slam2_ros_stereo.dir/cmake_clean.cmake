@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/orb_slam2_ros/orb_slam2_ros_stereo"
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/orb_slam2_ros/orb_slam2_ros_stereo.pdb"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/orb_slam2_ros/orb_slam2_ros_stereo"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/orb_slam2_ros/orb_slam2_ros_stereo.pdb"
   "CMakeFiles/orb_slam2_ros_stereo.dir/ros/src/Node.cc.o"
   "CMakeFiles/orb_slam2_ros_stereo.dir/ros/src/StereoNode.cc.o"
 )

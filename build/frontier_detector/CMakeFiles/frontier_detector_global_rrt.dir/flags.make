@@ -6,5 +6,5 @@ CXX_FLAGS =  -O3 -O3 -DNDEBUG   -std=c++11
 
 CXX_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"frontier_detector\"
 
-CXX_INCLUDES = -I/home/kenji/ws/explORB-SLAM-RL/devel/include -I/home/kenji/ws/explORB-SLAM-RL/src/frontier_detector/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/opencv4 -I/usr/include/eigen3 
+CXX_INCLUDES = -I/home/kenji_leong/explORB-SLAM-RL/devel/include -I/home/kenji_leong/explORB-SLAM-RL/src/frontier_detector/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/opencv4 -I/usr/include/eigen3 
 

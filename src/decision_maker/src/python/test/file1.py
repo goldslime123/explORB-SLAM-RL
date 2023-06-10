@@ -35,31 +35,33 @@ print(shortened_number)
 # print(output_list)
 
 
-centroid_str = '[array([ 1.73647123, -1.0440681 ]), array([3.02500005, 1.45000002]), array([1.65000003, 2.55000004]), array([3.30000005, 4.50000006])]'
+# centroid_str = '[array([ 1.73647123, -1.0440681 ]), array([3.02500005, 1.45000002]), array([1.65000003, 2.55000004]), array([3.30000005, 4.50000006])]'
 
-# Remove the word "array" from the string
-centroid_str = centroid_str.replace('array', '')
-# Remove all parentheses from the string
-centroid_str = centroid_str.replace('(', '').replace(')', '')
-# Remove the first and last brackets from the string
-centroid_str = centroid_str[1:-1]
+# # Remove the word "array" from the string
+# centroid_str = centroid_str.replace('array', '')
+# # Remove all parentheses from the string
+# centroid_str = centroid_str.replace('(', '').replace(')', '')
+# # Remove the first and last brackets from the string
+# centroid_str = centroid_str[1:-1]
 
-# Remove all empty spaces in the string
-centroid_str = centroid_str.replace(" ", "")
-print(centroid_str)
+# # Remove all empty spaces in the string
+# centroid_str = centroid_str.replace(" ", "")
+# print(centroid_str)
 
 
 
-# Remove the surrounding brackets from the string
-centroid_str = centroid_str.strip('[]')
+# # Remove the surrounding brackets from the string
+# centroid_str = centroid_str.strip('[]')
 
-# Split the string into individual coordinate pairs
-centroid_str = centroid_str.split('],[')
+# # Split the string into individual coordinate pairs
+# centroid_str = centroid_str.split('],[')
 
-# Process each pair to create the list of lists
-centroid_str = [list(map(float, pair.split(','))) for pair in centroid_str]
+# # Process each pair to create the list of lists
+# centroid_str = [list(map(float, pair.split(','))) for pair in centroid_str]
 
-print(centroid_str)
+# print(centroid_str)
+
+
 
 
 

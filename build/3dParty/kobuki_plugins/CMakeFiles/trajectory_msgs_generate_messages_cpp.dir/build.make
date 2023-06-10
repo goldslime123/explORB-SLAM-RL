@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kenji/ws/explORB-SLAM-RL/src
+CMAKE_SOURCE_DIR = /home/kenji_leong/explORB-SLAM-RL/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kenji/ws/explORB-SLAM-RL/build
+CMAKE_BINARY_DIR = /home/kenji_leong/explORB-SLAM-RL/build
 
 # Utility rule file for trajectory_msgs_generate_messages_cpp.
 
@@ -63,10 +63,10 @@ trajectory_msgs_generate_messages_cpp: 3dParty/kobuki_plugins/CMakeFiles/traject
 .PHONY : 3dParty/kobuki_plugins/CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/build
 
 3dParty/kobuki_plugins/CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/clean:
-	cd /home/kenji/ws/explORB-SLAM-RL/build/3dParty/kobuki_plugins && $(CMAKE_COMMAND) -P CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/cmake_clean.cmake
+	cd /home/kenji_leong/explORB-SLAM-RL/build/3dParty/kobuki_plugins && $(CMAKE_COMMAND) -P CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/cmake_clean.cmake
 .PHONY : 3dParty/kobuki_plugins/CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/clean
 
 3dParty/kobuki_plugins/CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/depend:
-	cd /home/kenji/ws/explORB-SLAM-RL/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenji/ws/explORB-SLAM-RL/src /home/kenji/ws/explORB-SLAM-RL/src/3dParty/kobuki_plugins /home/kenji/ws/explORB-SLAM-RL/build /home/kenji/ws/explORB-SLAM-RL/build/3dParty/kobuki_plugins /home/kenji/ws/explORB-SLAM-RL/build/3dParty/kobuki_plugins/CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/kenji_leong/explORB-SLAM-RL/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenji_leong/explORB-SLAM-RL/src /home/kenji_leong/explORB-SLAM-RL/src/3dParty/kobuki_plugins /home/kenji_leong/explORB-SLAM-RL/build /home/kenji_leong/explORB-SLAM-RL/build/3dParty/kobuki_plugins /home/kenji_leong/explORB-SLAM-RL/build/3dParty/kobuki_plugins/CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : 3dParty/kobuki_plugins/CMakeFiles/trajectory_msgs_generate_messages_cpp.dir/depend
 

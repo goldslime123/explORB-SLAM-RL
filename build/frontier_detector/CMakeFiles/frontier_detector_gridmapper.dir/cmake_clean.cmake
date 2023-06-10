@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/frontier_detector/frontier_detector_gridmapper"
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/frontier_detector/frontier_detector_gridmapper.pdb"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/frontier_detector/frontier_detector_gridmapper"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/frontier_detector/frontier_detector_gridmapper.pdb"
   "CMakeFiles/frontier_detector_gridmapper.dir/src/GridMapper.cpp.o"
 )
 

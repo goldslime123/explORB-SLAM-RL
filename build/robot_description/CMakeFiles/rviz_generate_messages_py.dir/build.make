@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kenji/ws/explORB-SLAM-RL/src
+CMAKE_SOURCE_DIR = /home/kenji_leong/explORB-SLAM-RL/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kenji/ws/explORB-SLAM-RL/build
+CMAKE_BINARY_DIR = /home/kenji_leong/explORB-SLAM-RL/build
 
 # Utility rule file for rviz_generate_messages_py.
 
@@ -63,10 +63,10 @@ robot_description/CMakeFiles/rviz_generate_messages_py.dir/build: rviz_generate_
 .PHONY : robot_description/CMakeFiles/rviz_generate_messages_py.dir/build
 
 robot_description/CMakeFiles/rviz_generate_messages_py.dir/clean:
-	cd /home/kenji/ws/explORB-SLAM-RL/build/robot_description && $(CMAKE_COMMAND) -P CMakeFiles/rviz_generate_messages_py.dir/cmake_clean.cmake
+	cd /home/kenji_leong/explORB-SLAM-RL/build/robot_description && $(CMAKE_COMMAND) -P CMakeFiles/rviz_generate_messages_py.dir/cmake_clean.cmake
 .PHONY : robot_description/CMakeFiles/rviz_generate_messages_py.dir/clean
 
 robot_description/CMakeFiles/rviz_generate_messages_py.dir/depend:
-	cd /home/kenji/ws/explORB-SLAM-RL/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenji/ws/explORB-SLAM-RL/src /home/kenji/ws/explORB-SLAM-RL/src/robot_description /home/kenji/ws/explORB-SLAM-RL/build /home/kenji/ws/explORB-SLAM-RL/build/robot_description /home/kenji/ws/explORB-SLAM-RL/build/robot_description/CMakeFiles/rviz_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/kenji_leong/explORB-SLAM-RL/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenji_leong/explORB-SLAM-RL/src /home/kenji_leong/explORB-SLAM-RL/src/robot_description /home/kenji_leong/explORB-SLAM-RL/build /home/kenji_leong/explORB-SLAM-RL/build/robot_description /home/kenji_leong/explORB-SLAM-RL/build/robot_description/CMakeFiles/rviz_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : robot_description/CMakeFiles/rviz_generate_messages_py.dir/depend
 

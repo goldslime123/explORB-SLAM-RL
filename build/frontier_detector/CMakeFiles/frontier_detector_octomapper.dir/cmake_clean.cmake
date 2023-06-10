@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/frontier_detector/frontier_detector_octomapper"
-  "/home/kenji/ws/explORB-SLAM-RL/devel/lib/frontier_detector/frontier_detector_octomapper.pdb"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/frontier_detector/frontier_detector_octomapper"
+  "/home/kenji_leong/explORB-SLAM-RL/devel/lib/frontier_detector/frontier_detector_octomapper.pdb"
   "CMakeFiles/frontier_detector_octomapper.dir/src/OctoMapper.cpp.o"
 )
 

@@ -76,14 +76,13 @@ def does_row_exist(file_name, row_data):
 
 
 def store_csv(robot_position, robot_orientation, centroid_str, info_gain_record):
-    csv_folder_path = '/home/kenji/ws/explORB-SLAM-RL/src/decision_maker/csv'
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv'
     folder_path = csv_folder_path + '/' + gazebo_env
     file_name = folder_path+'/'+str(shortened_number)+'.csv'
 
     row_data = ['robot_position', 'robot_orientation',
                 'centroid_record', 'info_gain_record']
     
-    print(type(centroid_str))
 
     if os.path.exists(folder_path):
         print("The folder exists.")
@@ -397,6 +396,9 @@ def node():
                         np.max(info_gain_record))
                     info_centroid_record = dict(
                         zip(info_gain_record, centroid_record))
+                    
+                    robo_pose = robot_.getPoseAsGeometryMsg()
+                    print("robot pose",robo_pose)
 
                     rospy.loginfo(rospy.get_name() +
                                   ": Frontiers: \n" + format(centroid_record))
@@ -411,43 +413,10 @@ def node():
                     # Get robot's current pose
                     robot_position = robot_.getPose()[0]
                     robot_orientation = robot_.getPose()[1]
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " position " +
-                                  format(robot_position))
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " orientation " +
-                                  format(robot_orientation))
                     
-                    import re
-                    centroid_str=str(centroid_record)
-                    # Remove the word "array" from the string
-                    centroid_str = centroid_str.replace('array', '')
-                    # Remove all parentheses from the string
-                    centroid_str = centroid_str.replace('(', '').replace(')', '')
-                    # Remove the first and last brackets from the string
-                    centroid_str = centroid_str[1:-1]
-
-                    # Remove all empty spaces in the string
-                    centroid_str = centroid_str.replace(" ", "")
-
-            
-
-                    
-                    # Remove the surrounding brackets from the string
-                    centroid_str = centroid_str.strip('[]')
-
-                    # Split the string into individual coordinate pairs
-                    centroid_str = centroid_str.split('],[')
-
-                    # Process each pair to create the list of lists
-                    centroid_str = [list(map(float, pair.split(','))) for pair in centroid_str]
-
-                    print("Centroid str",centroid_str)
-
-
                     store_csv(robot_position, robot_orientation,
-                              centroid_str, info_gain_record)
+                              centroid_record, info_gain_record)
                     
-                    print(centroid_record[winner_id])
-
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
                     robot_.sendGoal(centroid_record[winner_id], True)

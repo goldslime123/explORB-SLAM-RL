@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kenji/ws/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/lib/liborb_slam2_ros.pdb"
-  "/home/kenji/ws/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/lib/liborb_slam2_ros.so"
+  "/home/kenji_leong/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/lib/liborb_slam2_ros.pdb"
+  "/home/kenji_leong/explORB-SLAM-RL/src/3dParty/orb_slam_2_ros/orb_slam2/lib/liborb_slam2_ros.so"
   "CMakeFiles/orb_slam2_ros.dir/orb_slam2/src/Converter.cc.o"
   "CMakeFiles/orb_slam2_ros.dir/orb_slam2/src/Frame.cc.o"
   "CMakeFiles/orb_slam2_ros.dir/orb_slam2/src/FrameDrawer.cc.o"

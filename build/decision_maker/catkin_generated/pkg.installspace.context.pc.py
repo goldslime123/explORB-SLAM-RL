@@ -4,5 +4,5 @@ PROJECT_PKG_CONFIG_INCLUDE_DIRS = "".split(';') if "" != "" else []
 PROJECT_CATKIN_DEPENDS = "roscpp;rospy;std_msgs".replace(';', ' ')
 PKG_CONFIG_LIBRARIES_WITH_PREFIX = "".split(';') if "" != "" else []
 PROJECT_NAME = "decision_maker"
-PROJECT_SPACE_DIR = "/home/kenji/ws/explORB-SLAM-RL/install"
+PROJECT_SPACE_DIR = "/home/kenji_leong/explORB-SLAM-RL/install"
 PROJECT_VERSION = "0.0.0"

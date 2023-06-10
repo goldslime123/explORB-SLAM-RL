@@ -1,8 +1,8 @@
-# Install script for directory: /home/kenji/ws/explORB-SLAM-RL/src/3dParty/kobuki_plugins
+# Install script for directory: /home/kenji_leong/explORB-SLAM-RL/src/3dParty/kobuki_plugins
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/kenji/ws/explORB-SLAM-RL/install")
+  set(CMAKE_INSTALL_PREFIX "/home/kenji_leong/explORB-SLAM-RL/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,18 +38,18 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/build/3dParty/kobuki_plugins/catkin_generated/installspace/kobuki_plugins.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/build/3dParty/kobuki_plugins/catkin_generated/installspace/kobuki_plugins.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/kobuki_plugins/cmake" TYPE FILE FILES
-    "/home/kenji/ws/explORB-SLAM-RL/build/3dParty/kobuki_plugins/catkin_generated/installspace/kobuki_pluginsConfig.cmake"
-    "/home/kenji/ws/explORB-SLAM-RL/build/3dParty/kobuki_plugins/catkin_generated/installspace/kobuki_pluginsConfig-version.cmake"
+    "/home/kenji_leong/explORB-SLAM-RL/build/3dParty/kobuki_plugins/catkin_generated/installspace/kobuki_pluginsConfig.cmake"
+    "/home/kenji_leong/explORB-SLAM-RL/build/3dParty/kobuki_plugins/catkin_generated/installspace/kobuki_pluginsConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/kobuki_plugins" TYPE FILE FILES "/home/kenji/ws/explORB-SLAM-RL/src/3dParty/kobuki_plugins/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/kobuki_plugins" TYPE FILE FILES "/home/kenji_leong/explORB-SLAM-RL/src/3dParty/kobuki_plugins/package.xml")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -59,7 +59,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libgazebo_ros_kobuki.so"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES "/home/kenji/ws/explORB-SLAM-RL/devel/lib/libgazebo_ros_kobuki.so")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES "/home/kenji_leong/explORB-SLAM-RL/devel/lib/libgazebo_ros_kobuki.so")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libgazebo_ros_kobuki.so" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libgazebo_ros_kobuki.so")
     file(RPATH_CHANGE
