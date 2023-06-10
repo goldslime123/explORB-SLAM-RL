@@ -2,8 +2,25 @@ import torch
 import torch.nn as nn
 import numpy as np
 import random
+import ast
+import pandas as pd
 
-from read_csv import *
+import warnings
+
+# Disable the warning
+#warnings.filterwarnings("ignore", category=UserWarning)
+
+class DQN(nn.Module):
+    def __init__(self, input_size, output_size):
+        super(DQN, self).__init__()
+        self.fc1 = nn.Linear(input_size, 16)
+        self.fc2 = nn.Linear(16, output_size)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = torch.relu(x)
+        x = self.fc2(x)
+        return x
 
 
 class DQNModel:
@@ -12,231 +29,190 @@ class DQNModel:
         self.robot_orie_arr = robot_orie_arr
         self.centr_arr = centr_arr
         self.info_arr = info_arr
+        self.gamma = 0.99
         self.tau = 0.001
         self.save_interval = 10
-        self.epochs = 1000
-        self.filepath = f"/home/kenji/ws/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/target_network{self.epochs}.pth"
-
+        self.epochs = 100
+        self.filepath = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/modelstarget_network{self.epochs}.pth"
+        self.epsilon = 0.1
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
+        self.dones = None  # Initialize dones attribute
         # Initialize the DQN network
         self.initialize_dqn()
 
-        self.epsilon = 0.1  # Set the initial value of epsilon
-
-    def initialize_dqn(self):
+    def prepare_input(self, robot_pos, robot_orie, centr, info):
+        """Prepares the input for the DQN model."""
         # Convert the NumPy arrays to PyTorch tensors
-        robot_position = torch.tensor(self.robot_post_arr, dtype=torch.float32)
-        robot_orientation = torch.tensor(
-            self.robot_orie_arr, dtype=torch.float32)
-        centroid_record = torch.tensor(self.centr_arr, dtype=torch.float32)
-        info_gain_record = torch.tensor(self.info_arr, dtype=torch.float32)
+        robot_position = torch.tensor(robot_pos, dtype=torch.float32)
+        robot_orientation = torch.tensor(robot_orie, dtype=torch.float32)
+        centroid_record = torch.tensor(centr, dtype=torch.float32)
+        info_gain_record = torch.tensor(info, dtype=torch.float32)
 
         # Concatenate the robot's state
         robot_state = torch.cat((robot_position, robot_orientation))
-
         # Concatenate the robot state with the centroid record and info gain record
         combined_data = torch.cat((centroid_record, info_gain_record), dim=1)
         sorted_data = combined_data[combined_data[:, -
-                                                1].argsort(descending=True)]
-
+                                                  1].argsort(descending=True)]
         # Extract the sorted centroid record and info gain record
         sorted_centroid_record = sorted_data[:, :-1]
         sorted_info_gain_record = sorted_data[:, -1]
-
         # Flatten and concatenate the robot state, sorted centroid record, and sorted info gain record
         network_input = torch.cat(
             (robot_state, sorted_centroid_record.flatten(), sorted_info_gain_record.flatten()))
-
         # Reshape the network input
         input_size = network_input.numel()
         network_input = network_input.reshape(1, input_size)
-
         # Determine the output size based on the shape of the sorted centroid record
-        output_size = sorted_centroid_record.shape[0] * sorted_centroid_record.shape[1]
+        output_size = sorted_centroid_record.shape[0] * \
+            sorted_centroid_record.shape[1]
+        return network_input, output_size, sorted_centroid_record
 
-        # Define the DQN network
-        class DQN(nn.Module):
-            def __init__(self, input_size, output_size):
-                super(DQN, self).__init__()
-                self.fc1 = nn.Linear(input_size, 64)
-                self.fc2 = nn.Linear(64, output_size)
-
-            def forward(self, x):
-                x = self.fc1(x)
-                x = torch.relu(x)
-                x = self.fc2(x)
-                return x
-
-        # Create instances of the DQN and TargetDQN networks
-        self.dqn = DQN(input_size, output_size)
-        self.target_dqn = DQN(input_size, output_size)
-
-        # Define the criterion and the optimizer
+    def initialize_dqn(self):
+        """Initializes the DQN and target DQN models, and the optimizer and loss function."""
+        network_input, output_size, _ = self.prepare_input(
+            self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
+        )
+        self.dqn = DQN(network_input.shape[1], output_size).to(self.device)
+        self.target_dqn = DQN(
+            network_input.shape[1], output_size).to(self.device)
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.dqn.parameters())
-
-        # After each update step, update the target network
         self.update_target_network()
 
     def update_target_network(self):
+        """Updates the target DQN parameters using the DQN parameters."""
         for target_param, param in zip(self.target_dqn.parameters(), self.dqn.parameters()):
             target_param.data.copy_(
                 self.tau * param.data + (1 - self.tau) * target_param.data)
 
-    # Save the model
     def save_model(self):
+        """Saves the target DQN model."""
         torch.save(self.target_dqn.state_dict(), self.filepath)
 
-    def load_model(self, device):
-        self.target_dqn.load_state_dict(
-            torch.load(self.filepath, map_location=device))
+    def load_model(self):
+        """Loads the saved model into the target DQN."""
+        self.target_dqn.load_state_dict(torch.load(
+            self.filepath, map_location=self.device))
         self.target_dqn.eval()
 
     def select_action(self, state, output_size):
+        """Selects an action using the epsilon-greedy approach."""
         if random.random() < self.epsilon:
-            # Explore: Choose a random action
             action = random.randint(0, output_size - 1)
         else:
-            # Exploit: Choose the best action based on the current Q-values
             with torch.no_grad():
                 q_values = self.dqn(state)
                 action = q_values.argmax().item()
-
         return action
 
+    def calculate_reward(self, centroid):
+        """Calculates the reward for a given centroid."""
+        rewards = []
+        for info_gain in centroid:
+            reward = info_gain.sum()  # Compute the reward based on the sum of the information gain
+            rewards.append(reward)
+        rewards = torch.tensor(rewards, dtype=torch.float32, device=self.device).unsqueeze(1)
+        return rewards
+    
     def train(self):
+        penalty_scale = 1.0
+        zero_centroid = torch.tensor([0.0, 0.0], device=self.device)
+        self.dones = torch.zeros((1,), device=self.device)  # Update dones attribute
         for epoch in range(self.epochs):
-            # Convert the NumPy arrays to PyTorch tensors
-            robot_position = torch.tensor(
-                self.robot_post_arr, dtype=torch.float32)
-            robot_orientation = torch.tensor(
-                self.robot_orie_arr, dtype=torch.float32)
-            centroid_record = torch.tensor(
-                self.centr_arr, dtype=torch.float32)
-            info_gain_record = torch.tensor(
-                self.info_arr, dtype=torch.float32)
-
-            # Concatenate the reshaped robot_position and robot_orientation
-            robot_state = torch.cat((robot_position, robot_orientation))
-
-            # Concatenate the robot state with the centroid record and info gain record
-            combined_data = torch.cat(
-                (centroid_record, info_gain_record), dim=1)
-            sorted_data = combined_data[combined_data[:, -1].argsort(descending=True)]
-
-            # Extract the sorted centroid record and info gain record
-            sorted_centroid_record = sorted_data[:, :-1]
-            sorted_info_gain_record = sorted_data[:, -1]
-
-            # Flatten and concatenate the robot state, sorted centroid record, and sorted info gain record
-            network_input = torch.cat(
-                (robot_state, sorted_centroid_record.flatten(), sorted_info_gain_record.flatten()))
-
-            # Reshape the network input
-            input_size = network_input.numel()
-            network_input = network_input.reshape(1, input_size)
-
-            # Define the target
-            target = sorted_centroid_record
-
-            # Pass the network input through the DQN network
-            output = self.dqn(network_input)
-
-            # Reshape the output to match the shape of sorted_centroid_record
+            network_input, output_size, sorted_centroid_record = self.prepare_input(
+                self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
+            )
+            target = sorted_centroid_record.to(self.device)
+            output = self.dqn(network_input.to(self.device))
             output = output.view(sorted_centroid_record.shape)
 
-            # Compute the loss
-            loss = self.criterion(output, target)
+            # Compute Targets
+            target_network_input, _, _ = self.prepare_input(
+                self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
+            )
+            target_q_values = self.target_dqn(
+                target_network_input.to(self.device))
+            max_target_q_values = target_q_values.max(dim=1, keepdim=True)[0]
 
-            # Zero the gradients
+            rewards = self.calculate_reward(target)
+            targets = rewards + self.gamma * (1 - self.dones) * max_target_q_values.detach()
+
+            loss = self.criterion(output, targets)
+
+            penalty = penalty_scale * \
+                torch.sum(torch.abs(output - zero_centroid))
+            loss += penalty
+
             self.optimizer.zero_grad()
-
-            # Choose the action with epsilon-greedy policy
-            action = self.select_action(network_input, output_size=sorted_centroid_record.numel())
-
-            # Perform a backward pass (backpropagation)
+            action = self.select_action(network_input, output_size)
             loss.backward()
-
-            # Update the weights
             self.optimizer.step()
-
-            # After each update step, update the target network
             self.update_target_network()
-
-            # Update epsilon
             self.update_epsilon(epoch)
-
-            # Save the target network model at the specified interval
             if (epoch + 1) % self.save_interval == 0:
                 self.save_model()
-
-            # Print the loss every 100 epochs
-            if epoch % 100 == 0:
+            if epoch % 10 == 0:
                 print(f"Epoch: {epoch}, Loss: {loss.item()}, Action: {action}")
 
     def update_epsilon(self, epoch):
-        # Decay epsilon over time
+        """Decays epsilon over time."""
         self.epsilon = max(0.01, 0.1 - (0.09 / self.epochs) * epoch)
 
     def get_max_info_gain_centroid(self):
-        # Ensure the model is in evaluation mode
+        """Finds the centroid with the highest information gain."""
         self.target_dqn.eval()
-
-        # Convert the NumPy arrays to PyTorch tensors
-        robot_position = torch.tensor(
-            self.robot_post_arr, dtype=torch.float32)
-        robot_orientation = torch.tensor(
-            self.robot_orie_arr, dtype=torch.float32)
-        centroid_record = torch.tensor(
-            self.centr_arr, dtype=torch.float32)
-        info_gain_record = torch.tensor(
-            self.info_arr, dtype=torch.float32)
-
-        # Concatenate the robot's state
-        robot_state = torch.cat((robot_position, robot_orientation))
-
-        # Concatenate the robot state with the centroid record and info gain record
-        combined_data = torch.cat(
-            (centroid_record, info_gain_record), dim=1)
-        sorted_data = combined_data[combined_data[:, -
-                                                  1].argsort(descending=True)]
-
-        # Extract the sorted centroid record and info gain record
-        sorted_centroid_record = sorted_data[:, :-1]
-        sorted_info_gain_record = sorted_data[:, -1]
-
-        # Flatten and concatenate the robot state, sorted centroid record, and sorted info gain record
-        network_input = torch.cat(
-            (robot_state, sorted_centroid_record.flatten(), sorted_info_gain_record.flatten()))
-
-        # Reshape the network input
-        input_size = network_input.numel()
-        network_input = network_input.reshape(1, input_size)
-
-        # Pass the network input through the target network
+        network_input, _, sorted_centroid_record = self.prepare_input(
+            self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
+        )
         with torch.no_grad():
-            output = self.target_dqn(network_input)
+            output = self.target_dqn(network_input.to(self.device))
             output = output.reshape(sorted_centroid_record.shape)
-
-        # Find the index of the maximum predicted gain, which gives us the centroid with the highest predicted gain
-        max_info_gain_centroid_idx = np.argmax(output.numpy())
-
-        # Ensure the index is within bounds
+        max_info_gain_centroid_idx = np.argmax(output.cpu().numpy())
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[0]
-
-        # Return the centroid with the highest info gain
         return sorted_centroid_record[max_info_gain_centroid_idx]
 
 
-if __name__ == '__main__':
-    robot_post_arr, robot_orie_arr, centr_arr, info_arr = read_from_csv()
-    model = DQNModel(robot_post_arr, robot_orie_arr, centr_arr, info_arr)
+def read_from_csv(directory):
+    """Reads the input data from a CSV file."""
+    raw_data = pd.read_csv(directory, sep=" ", header=None)
+    robot_position = raw_data[0].apply(
+        lambda x: [float(i) for i in x.split(",")])
+    robot_orientation = raw_data[1].apply(
+        lambda x: [float(i) for i in x.split(",")])
+    centroid_record = raw_data[2].apply(ast.literal_eval)
+    info_gain_record = raw_data[3].apply(ast.literal_eval)
+    return (
+        robot_position.tolist(),
+        robot_orientation.tolist(),
+        centroid_record.tolist(),
+        info_gain_record.tolist(),
+    )
 
-    model.train()
 
-    # Load the model
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.load_model(device)
+if __name__ == "__main__":
+    directory = "/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv/aws_house/a.csv"
+    robot_positions, robot_orientations, centroid_records, info_gain_records = read_from_csv(
+        directory
+    )
 
-    # Find the centroid with the highest info gain
+    # Convert the input arrays to tensors
+    robot_positions = [torch.tensor(
+        arr, dtype=torch.float32).clone().detach() for arr in robot_positions]
+    robot_orientations = [torch.tensor(
+        arr, dtype=torch.float32).clone().detach() for arr in robot_orientations]
+    centroid_records = [torch.tensor(
+        arr, dtype=torch.float32).clone().detach() for arr in centroid_records]
+    info_gain_records = [torch.tensor(
+        arr, dtype=torch.float32).clone().detach() for arr in info_gain_records]
+
+    for i in range(len(robot_positions)):
+        model = DQNModel(
+            robot_positions[i], robot_orientations[i], centroid_records[i], info_gain_records[i]
+        )
+        model.train()
+
+    model.load_model()
     max_info_gain_centroid = model.get_max_info_gain_centroid()
     print(f"The centroid with the highest information gain is {max_info_gain_centroid}")

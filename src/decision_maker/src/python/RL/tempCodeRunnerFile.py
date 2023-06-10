@@ -1,0 +1,1 @@
+info_gain_record = torch.tensor(info, dtype=torch.float32)
