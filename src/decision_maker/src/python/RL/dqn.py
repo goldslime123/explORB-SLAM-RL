@@ -24,6 +24,7 @@ class DQN(nn.Module):
 
 class DQNModel:
     def __init__(self, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
+        # paremeters
         self.robot_post_arr = robot_post_arr
         self.robot_orie_arr = robot_orie_arr
         self.centr_arr = centr_arr
@@ -102,6 +103,9 @@ class DQNModel:
         self.target_dqn.load_state_dict(torch.load(
             self.filepath, map_location=self.device))
         self.target_dqn.eval()
+        # Get the centroid with the highest information gain
+        max_info_gain_centroid, _ = self.get_max_info_gain_centroid()
+        return max_info_gain_centroid
 
     def select_action(self, state, output_size):
         """Selects an action using the epsilon-greedy approach."""
@@ -137,6 +141,7 @@ class DQNModel:
     def train(self):
         zero_centroid = torch.tensor([0.0, 0.0], device=self.device)
         self.dones = torch.zeros((1,), device=self.device)
+
         for epoch in range(self.epochs):
             network_input, output_size, _ = self.prepare_input(
                 self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
@@ -155,6 +160,7 @@ class DQNModel:
 
             rewards, predicted_centroid = self.calculate_reward()
 
+            # check terminating condition
             targets = rewards + self.gamma * \
                 (1 - self.dones) * max_target_q_values.detach()
 
@@ -190,7 +196,6 @@ class DQNModel:
 
     def get_max_info_gain_centroid(self):
         """Finds the centroid with the highest information gain."""
-        self.target_dqn.eval()
         network_input, _, sorted_centroid_record = self.prepare_input(
             self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
         )
@@ -232,7 +237,5 @@ if __name__ == "__main__":
             robot_positions[i], robot_orientations[i], centroid_records[i], info_gain_records[i], best_centroid[i]
         )
         model.train()
-
-    model.load_model()
-    # max_info_gain_centroid = model.select_best_centroid()
-    # print(f"The centroid with the highest information gain is {max_info_gain_centroid}")
+        
+    print(f"The centroid with the highest information gain is {model.load_model()}")
