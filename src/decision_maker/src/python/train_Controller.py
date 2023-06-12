@@ -415,7 +415,7 @@ def node():
                     robot_orientation = robot_.getPose()[1]
                     
                     store_csv(robot_position, robot_orientation,
-                              centroid_record, info_gain_record)
+                              centroid_record, info_gain_record,centroid_record[winner_id])
                     
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
