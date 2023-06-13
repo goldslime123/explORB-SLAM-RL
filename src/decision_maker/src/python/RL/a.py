@@ -4,6 +4,7 @@ import numpy as np
 import random
 import ast
 import pandas as pd
+from collections import deque
 
 
 class DQN(nn.Module):
@@ -22,15 +23,43 @@ class DQN(nn.Module):
         return x
 
 
+class ReplayBuffer:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.buffer = deque(maxlen=capacity)
+
+    def push(self, state, action, reward, next_state, done):
+        experience = (state, action, reward, next_state, done)
+        self.buffer.append(experience)
+
+    def sample(self, batch_size):
+        state_batch, action_batch, reward_batch, next_state_batch, done_batch = zip(
+            *random.sample(self.buffer, batch_size)
+        )
+        return state_batch, action_batch, reward_batch, next_state_batch, done_batch
+
+    def __len__(self):
+        return len(self.buffer)
+
+
 class DQNModel:
     def __init__(self, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # paremeters
-        self.robot_post_arr = robot_post_arr
-        self.robot_orie_arr = robot_orie_arr
-        self.centr_arr = centr_arr
-        self.info_arr = info_arr
-        self.best_centr_arr = best_centr_arr
+        self.robot_post_arr = robot_post_arr[0]
+        self.robot_orie_arr = robot_orie_arr[0]
+        self.centr_arr = centr_arr[0]
+        self.info_arr = info_arr[0]
+        self.best_centr_arr = best_centr_arr[0]
+
+        self.robot_post_arr2 = robot_post_arr
+        self.robot_orie_arr2 = robot_orie_arr
+        self.centr_arr2 = centr_arr
+        self.info_arr2 = info_arr
+        self.best_centr_arr2 = best_centr_arr
+
+
         self.gamma = 0.99
+        self.learning_rate=0.01
         self.tau = 0.001
         self.save_interval = 10
         self.epochs = 100
@@ -39,6 +68,10 @@ class DQNModel:
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.dones = None
+        self.batch_size = 1
+
+        # Initialize the replay buffer
+        self.replay_buffer = deque(maxlen=10000)
 
         # Initialize the DQN network
         self.initialize_dqn()
@@ -88,11 +121,21 @@ class DQNModel:
         self.optimizer = torch.optim.Adam(self.dqn.parameters())
         self.save_model()
 
+    def add_to_replay_buffer(self, state, action, reward, next_state, done):
+        """Add a new experience to the replay buffer."""
+        self.replay_buffer.append((state, action, reward, next_state, done))
+
+    def sample_from_replay_buffer(self, batch_size):
+        """Randomly sample a batch of experiences from the replay buffer."""
+        return random.sample(self.replay_buffer, batch_size)
+
     def update_target_network(self):
         """Updates the target DQN parameters using the DQN parameters."""
         for target_param, param in zip(self.target_dqn.parameters(), self.dqn.parameters()):
             target_param.data.copy_(
                 self.tau * param.data + (1 - self.tau) * target_param.data)
+
+        self.save_model()
 
     def save_model(self):
         """Saves the target DQN model."""
@@ -103,8 +146,6 @@ class DQNModel:
         self.target_dqn.load_state_dict(torch.load(
             self.filepath, map_location=self.device))
         self.target_dqn.eval()
-
-        
 
     def select_action(self, state, output_size):
         """Selects an action using the epsilon-greedy approach."""
@@ -141,57 +182,77 @@ class DQNModel:
         zero_centroid = torch.tensor([0.0, 0.0], device=self.device)
         self.dones = torch.zeros((1,), device=self.device)
 
-        for epoch in range(self.epochs):
-            network_input, output_size, _ = self.prepare_input(
-                self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
-            )
+        self.replay_buffer = ReplayBuffer(10000)  # Initialize replay buffer
+        for i in range(len(self.robot_post_arr2)):  
+            for epoch in range(self.epochs):
+                # print( self.robot_post_arr)
+                network_input, output_size, _ = self.prepare_input(
+                    self.robot_post_arr2[i], self.robot_orie_arr2[i], self.centr_arr2[i], self.info_arr2[i]
+                )
 
-            q_values = self.dqn(network_input.to(self.device))
+                # select action
+                action = self.select_action(network_input, output_size)
 
-            # Compute Targets
-            target_network_input, _, _ = self.prepare_input(
-                self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
-            )
+                rewards, predicted_centroid = self.calculate_reward()
 
-            target_q_values = self.target_dqn(
-                target_network_input.to(self.device))
-            max_target_q_values = target_q_values.max(dim=1, keepdim=True)[0]
+                # save next state
+                next_state, _, _ = self.prepare_input(
+                    self.robot_post_arr2[i], self.robot_orie_arr2[i], self.centr_arr2[i], self.info_arr2[i]
+                )
+                # print(next_state)
+                done = torch.all(torch.eq(predicted_centroid,
+                                torch.tensor([0.0, 0.0], device=self.device)))
 
-            rewards, predicted_centroid = self.calculate_reward()
+                # store into replay buffer current state
+                self.replay_buffer.push(
+                    network_input, action, rewards, next_state, done)
 
-            # check terminating condition
-            targets = rewards + self.gamma * \
-                (1 - self.dones) * max_target_q_values.detach()
+                if len(self.replay_buffer) >= self.batch_size:
+                    # Get a batch of experiences from the replay buffer
+                    states, actions, rewards, next_states, dones = self.replay_buffer.sample(
+                        self.batch_size)
+                    
+                    states = torch.stack(states).to(self.device)
+                    actions = torch.tensor(actions, dtype=torch.long).unsqueeze(-1).to(self.device)
+                    rewards = torch.tensor(rewards, dtype=torch.float32).unsqueeze(-1).to(self.device)
+                    next_states = torch.stack(next_states).to(self.device)
+                    dones = torch.tensor(dones, dtype=torch.float32).unsqueeze(-1).to(self.device)
+                    
+                    # print( type(states), actions, rewards, next_states, dones)
+                    
+                    q_values = self.dqn(states)
+                    next_q_values = self.target_dqn(next_states)
+                    max_next_q_values = next_q_values.max(dim=1, keepdim=True)[0]
+                    
+                    # print(states.shape,actions.shape,rewards.shape,next_states.shape,dones.shape)
+                    targets = q_values + self.learning_rate * (rewards * q_values + self.gamma * max_next_q_values - q_values)
+                    
+                    # targets = rewards + self.gamma * \
+                    #     (1 - dones) * max_next_q_values.detach()
+    
+                    # Match output tensor shape (batch_size, 5)
+                    targets = targets.expand_as(q_values)
+                    # print(targets)
+                    # print(q_values,targets)
+                    loss = self.criterion(q_values, targets)
 
-            # Match output tensor shape (1, 5)
-            targets = targets.expand_as(q_values)
+                    # Add penalty if the predicted centroid matches [0, 0]
+                    if torch.all(torch.eq(predicted_centroid, zero_centroid)):
+                        penalty = 0.1  # Adjust penalty value as needed
+                        loss += penalty
 
-            loss = self.criterion(q_values, targets)
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
 
-            # print(q_values,targets)
+                    self.update_epsilon(epoch)
 
-            # Add penalty if the predicted centroid matches [0, 0]
-            if torch.all(torch.eq(predicted_centroid, zero_centroid)):
-                penalty =0.1  # Adjust penalty value as needed
-                loss += penalty
+                    if (epoch + 1) % self.save_interval == 0:
+                        self.update_target_network()
 
-            self.optimizer.zero_grad()
+                if epoch % 10 == 0:
+                    print(f"Epoch: {epoch}, Loss: {loss.item()}, Action: {action}")
 
-            action = self.select_action(network_input, output_size)
-
-            loss.backward()
-
-            self.optimizer.step()
-            
-            self.update_epsilon(epoch)
-
-            if (epoch + 1) % self.save_interval == 0:
-                self.update_target_network()
-                
-
-            if epoch % 10 == 0:
-                print(f"Epoch: {epoch}, Loss: {loss.item()}, Action: {action}")
-        
     def update_epsilon(self, epoch):
         """Decays epsilon over time."""
         self.epsilon = max(0.01, 0.1 - (0.09 / self.epochs) * epoch)
@@ -210,15 +271,13 @@ class DQNModel:
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
-    
-    
-    
+
     def predict_centroid(self, robot_position, robot_orientation):
         """Predicts the best centroid based on the given robot position and orientation using the target network."""
         self.load_model()
-        
-        centr_arr = [[1,2],[3,4],[0,0],[0,0],[0,0]]
-        info_arr =[[10],[20],[0],[0],[0]]
+
+        centr_arr = [[1, 2], [3, 4], [0, 0], [0, 0], [0, 0]]
+        info_arr = [[10], [20], [0], [0], [0]]
         """Finds the centroid with the highest information gain."""
         network_input, _, sorted_centroid_record = self.prepare_input(
             robot_position, robot_orientation, centr_arr, info_arr
@@ -232,7 +291,6 @@ class DQNModel:
 
         return max_info_gain_centroid
 
-    
 
 def read_from_csv():
     """Reads the input data from a CSV file."""
@@ -253,6 +311,7 @@ def read_from_csv():
         best_centroid.tolist()
     )
 
+
 if __name__ == "__main__":
     robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_from_csv()
 
@@ -262,7 +321,8 @@ if __name__ == "__main__":
     for i in range(len(robot_positions)):
         if model is None:
             # Create a new model for the first row
-            model = DQNModel(robot_positions[i], robot_orientations[i], centroid_records[i], info_gain_records[i], best_centroids[i])
+            model = DQNModel(robot_positions, robot_orientations,
+                             centroid_records, info_gain_records, best_centroids[i])
             model.initialize_dqn()
         else:
             # Update the model for subsequent rows
@@ -278,9 +338,9 @@ if __name__ == "__main__":
         predicted_centroids.append(predicted_centroid)
 
     for i, centroid in enumerate(predicted_centroids):
-        print(f"The centroid with the highest information gain for row {i+1} is {centroid}")
+        print(
+            f"The centroid with the highest information gain for row {i+1} is {centroid}")
 
-    predicted_centroid = model.predict_centroid(robot_positions[0], robot_orientations[0])
+    predicted_centroid = model.predict_centroid(
+        robot_positions[0], robot_orientations[0])
     print("Predicted centroid:", predicted_centroid)
-
-
