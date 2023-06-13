@@ -86,7 +86,6 @@ class DQNModel:
             network_input.shape[1], output_size).to(self.device)
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.dqn.parameters())
-        self.update_target_network()
 
     def update_target_network(self):
         """Updates the target DQN parameters using the DQN parameters."""
@@ -103,9 +102,8 @@ class DQNModel:
         self.target_dqn.load_state_dict(torch.load(
             self.filepath, map_location=self.device))
         self.target_dqn.eval()
-        # Get the centroid with the highest information gain
-        max_info_gain_centroid, _ = self.get_max_info_gain_centroid()
-        return max_info_gain_centroid
+
+        
 
     def select_action(self, state, output_size):
         """Selects an action using the epsilon-greedy approach."""
@@ -122,7 +120,7 @@ class DQNModel:
 
     def calculate_reward(self):
         """Calculates the reward for a given centroid."""
-        predicted_centroid, predicted_centroid_idx = self.get_max_info_gain_centroid()
+        predicted_centroid, _ = self.get_max_info_gain_centroid()
 
         target_centroid = torch.tensor(
             self.best_centr_arr, dtype=torch.float32, device=self.device)
@@ -147,7 +145,7 @@ class DQNModel:
                 self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
             )
 
-            output = self.dqn(network_input.to(self.device))
+            q_values = self.dqn(network_input.to(self.device))
 
             # Compute Targets
             target_network_input, _, _ = self.prepare_input(
@@ -165,13 +163,15 @@ class DQNModel:
                 (1 - self.dones) * max_target_q_values.detach()
 
             # Match output tensor shape (1, 5)
-            targets = targets.expand_as(output)
+            targets = targets.expand_as(q_values)
 
-            loss = self.criterion(output, targets)
+            loss = self.criterion(q_values, targets)
+
+            # print(q_values,targets)
 
             # Add penalty if the predicted centroid matches [0, 0]
             if torch.all(torch.eq(predicted_centroid, zero_centroid)):
-                penalty = 0.1  # Adjust penalty value as needed
+                penalty =0.1  # Adjust penalty value as needed
                 loss += penalty
 
             self.optimizer.zero_grad()
@@ -181,12 +181,13 @@ class DQNModel:
             loss.backward()
 
             self.optimizer.step()
-
-            self.update_target_network()
+            
             self.update_epsilon(epoch)
 
             if (epoch + 1) % self.save_interval == 0:
+                self.update_target_network()
                 self.save_model()
+
             if epoch % 10 == 0:
                 print(f"Epoch: {epoch}, Loss: {loss.item()}, Action: {action}")
 
@@ -195,6 +196,7 @@ class DQNModel:
         self.epsilon = max(0.01, 0.1 - (0.09 / self.epochs) * epoch)
 
     def get_max_info_gain_centroid(self):
+        self.load_model()
         """Finds the centroid with the highest information gain."""
         network_input, _, sorted_centroid_record = self.prepare_input(
             self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
@@ -207,7 +209,29 @@ class DQNModel:
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
+    
+    
+    
+    def predict_centroid(self, robot_position, robot_orientation):
+        """Predicts the best centroid based on the given robot position and orientation using the target network."""
+        self.load_model()
+        
+        centr_arr = [[1,2],[3,4],[0,0],[0,0],[0,0]]
+        info_arr =[[10],[20],[0],[0],[0]]
+        """Finds the centroid with the highest information gain."""
+        network_input, _, sorted_centroid_record = self.prepare_input(
+            robot_position, robot_orientation, centr_arr, info_arr
+        )
+        with torch.no_grad():
+            output = self.target_dqn(network_input.to(self.device))
+        max_info_gain_centroid_idx = np.argmax(output.cpu().numpy())
+        max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
+            0]
+        max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
+        return max_info_gain_centroid
+
+    
 
 def read_from_csv():
     """Reads the input data from a CSV file."""
@@ -225,17 +249,37 @@ def read_from_csv():
         robot_orientation.tolist(),
         centroid_record.tolist(),
         info_gain_record.tolist(),
-        best_centroid.tolist(),
+        best_centroid.tolist()
     )
 
-
 if __name__ == "__main__":
-    robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroid = read_from_csv()
+    robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_from_csv()
+
+    model = None  # Initialize the model outside the loop
+    predicted_centroids = []
 
     for i in range(len(robot_positions)):
-        model = DQNModel(
-            robot_positions[i], robot_orientations[i], centroid_records[i], info_gain_records[i], best_centroid[i]
-        )
+        if model is None:
+            # Create a new model for the first row
+            model = DQNModel(robot_positions[i], robot_orientations[i], centroid_records[i], info_gain_records[i], best_centroids[i])
+            model.initialize_dqn()
+        else:
+            # Update the model for subsequent rows
+            model.load_model()
+            model.robot_post_arr = robot_positions[i]
+            model.robot_orie_arr = robot_orientations[i]
+            model.centr_arr = centroid_records[i]
+            model.info_arr = info_gain_records[i]
+            model.best_centr_arr = best_centroids[i]
+
         model.train()
-        
-    print(f"The centroid with the highest information gain is {model.load_model()}")
+        predicted_centroid = model.get_max_info_gain_centroid()
+        predicted_centroids.append(predicted_centroid)
+
+    for i, centroid in enumerate(predicted_centroids):
+        print(f"The centroid with the highest information gain for row {i+1} is {centroid}")
+
+    predicted_centroid = model.predict_centroid(robot_positions[0], robot_orientations[0])
+    print("Predicted centroid:", predicted_centroid)
+
+
