@@ -247,7 +247,7 @@ class DQNModel:
                 self.update_target_network()
                 self.save_model()
 
-            print(f"Epoch: {epoch}, Loss: {loss.item()}, Action: {actions}")
+            print(f"Epoch: {epoch}, Loss: {loss.item()}")
 
     def update_epsilon(self, epoch):
         """Decays epsilon over time."""
@@ -268,15 +268,18 @@ class DQNModel:
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
 
-    def predict_centroid(self, robot_position, robot_orientation):
+    def predict_centroid(self, robot_position, robot_orientation, centroid_records, info_gain_records):
         """Predicts the best centroid based on the given robot position and orientation using the target network."""
         self.load_model()
 
         centr_arr = [[1, 2], [3, 4], [0, 0], [0, 0], [0, 0]]
         info_arr = [[10], [20], [0], [0], [0]]
+
+        # print(robot_position, robot_orientation,
+        #       centroid_records, info_gain_records)
         """Finds the centroid with the highest information gain."""
         network_input, _, sorted_centroid_record = self.prepare_input(
-            robot_position, robot_orientation, centr_arr, info_arr
+            robot_position, robot_orientation, centroid_records, info_gain_records
         )
         with torch.no_grad():
             output = self.target_dqn(network_input.to(self.device))
@@ -285,7 +288,7 @@ class DQNModel:
             0]
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
-        return max_info_gain_centroid
+        return max_info_gain_centroid,max_info_gain_centroid_idx
 
 
 def read_from_csv():
@@ -308,21 +311,51 @@ def read_from_csv():
     )
 
 
+if __name__ == "__main__":
+    robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_from_csv()
+
+    # Create a new model for the first row
+    model = DQNModel(robot_positions, robot_orientations,
+                     centroid_records, info_gain_records, best_centroids)
+    model.initialize_dqn()
+
+    model.train()
+
+    for i in range(len(robot_positions)):
+
+        predicted_centroid,max_info_gain_centroid_idx = model.predict_centroid(
+            robot_positions[i], robot_orientations[i], centroid_records[i], info_gain_records[i])
+        print(
+            f"The centroid with the highest information gain for row {i+1} is {predicted_centroid} Index: {max_info_gain_centroid_idx}")
+
+    # predicted_centroid = model.predict_centroid(
+    #     robot_positions[0], robot_orientations[0], centroid_records[0], info_gain_records[0])
+    # print("Predicted centroid:", predicted_centroid)
+
+
 # if __name__ == "__main__":
 #     robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_from_csv()
 
 #     model = None  # Initialize the model outside the loop
 #     predicted_centroids = []
 
+#     for i in range(len(robot_positions)):
+#         if model is None:
+#             # Create a new model for the first row
+#             model = DQNModel(robot_positions, robot_orientations,
+#                              centroid_records, info_gain_records, best_centroids[i])
+#             model.initialize_dqn()
+#         else:
+#             # Update the model for subsequent rows
+#             model.robot_post_arr = robot_positions[i]
+#             model.robot_orie_arr = robot_orientations[i]
+#             model.centr_arr = centroid_records[i]
+#             model.info_arr = info_gain_records[i]
+#             model.best_centr_arr = best_centroids[i]
 
-#     # Create a new model for the first row
-#     model = DQNModel(robot_positions, robot_orientations,
-#                         centroid_records, info_gain_records, best_centroids)
-#     model.initialize_dqn()
-
-#     model.train()
-#     predicted_centroid = model.get_max_info_gain_centroid()
-#     predicted_centroids.append(predicted_centroid)
+#         model.train()
+#         predicted_centroid = model.get_max_info_gain_centroid()
+#         predicted_centroids.append(predicted_centroid)
 
 #     for i, centroid in enumerate(predicted_centroids):
 #         print(
@@ -331,36 +364,3 @@ def read_from_csv():
 #     predicted_centroid = model.predict_centroid(
 #         robot_positions[0], robot_orientations[0])
 #     print("Predicted centroid:", predicted_centroid)
-
-
-if __name__ == "__main__":
-    robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_from_csv()
-
-    model = None  # Initialize the model outside the loop
-    predicted_centroids = []
-
-    for i in range(len(robot_positions)):
-        if model is None:
-            # Create a new model for the first row
-            model = DQNModel(robot_positions, robot_orientations,
-                             centroid_records, info_gain_records, best_centroids[i])
-            model.initialize_dqn()
-        else:
-            # Update the model for subsequent rows
-            model.robot_post_arr = robot_positions[i]
-            model.robot_orie_arr = robot_orientations[i]
-            model.centr_arr = centroid_records[i]
-            model.info_arr = info_gain_records[i]
-            model.best_centr_arr = best_centroids[i]
-
-        model.train()
-        predicted_centroid = model.get_max_info_gain_centroid()
-        predicted_centroids.append(predicted_centroid)
-
-    for i, centroid in enumerate(predicted_centroids):
-        print(
-            f"The centroid with the highest information gain for row {i+1} is {centroid}")
-
-    predicted_centroid = model.predict_centroid(
-        robot_positions[0], robot_orientations[0])
-    print("Predicted centroid:", predicted_centroid)
