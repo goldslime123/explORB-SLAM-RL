@@ -5,16 +5,17 @@ from ddqn import DDQNAgent
 from dueling_dqn import DuelingDQNAgent
 from dueling_ddqn import DuelingDDQNAgent
 
+
 class Agent:
     def __init__(self, algo, gazebo_env, gamma, learning_rate, tau, epsilon,
-                 save_interval, epochs, batch_size, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
+                 save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # parameters
         self.robot_post_arr = robot_post_arr
         self.robot_orie_arr = robot_orie_arr
         self.centr_arr = centr_arr
         self.info_arr = info_arr
         self.best_centr_arr = best_centr_arr
-        
+
         self.algorithm = algo
         self.gazebo_env = gazebo_env
         self.gamma = gamma
@@ -24,35 +25,36 @@ class Agent:
         self.save_interval = save_interval
         self.epochs = epochs
         self.batch_size = batch_size
-        
+        self.penalty = penalty
+
         # Initialize the model attribute
-        self.model = None 
+        self.model = None
 
         # Initialize the specific model based on the chosen algorithm
         if algo == 'dqn':
             self.model = DQNAgent(
                 gazebo_env, gamma, learning_rate, tau, epsilon,
-                save_interval, epochs, batch_size,
+                save_interval, epochs, batch_size, penalty,
                 robot_positions, robot_orientations,
                 centroid_records, info_gain_records, best_centroids)
-            
-        elif algo =='ddqn':
+
+        elif algo == 'ddqn':
             self.model = DDQNAgent(
                 gazebo_env, gamma, learning_rate, tau, epsilon,
-                save_interval, epochs, batch_size,
+                save_interval, epochs, batch_size, penalty,
                 robot_positions, robot_orientations,
                 centroid_records, info_gain_records, best_centroids)
-        elif algo =='dueling_dqn':
+        elif algo == 'dueling_dqn':
             self.model = DuelingDQNAgent(
                 gazebo_env, gamma, learning_rate, tau, epsilon,
-                save_interval, epochs, batch_size,
+                save_interval, epochs, batch_size, penalty,
                 robot_positions, robot_orientations,
                 centroid_records, info_gain_records, best_centroids)
-            
-        elif algo =='dueling_ddqn':
+
+        elif algo == 'dueling_ddqn':
             self.model = DuelingDDQNAgent(
                 gazebo_env, gamma, learning_rate, tau, epsilon,
-                save_interval, epochs, batch_size,
+                save_interval, epochs, batch_size, penalty,
                 robot_positions, robot_orientations,
                 centroid_records, info_gain_records, best_centroids)
 
@@ -89,7 +91,7 @@ class Agent:
 def read_from_csv(directory):
     """Reads the input data from a CSV file."""
     raw_data = pd.read_csv(directory, sep=" ", header=None)
-    
+
     robot_position = raw_data[0].apply(
         lambda x: [float(i) for i in x.split(",")])
     robot_orientation = raw_data[1].apply(
@@ -97,7 +99,7 @@ def read_from_csv(directory):
     centroid_record = raw_data[2].apply(ast.literal_eval)
     info_gain_record = raw_data[3].apply(ast.literal_eval)
     best_centroid = raw_data[4].apply(ast.literal_eval)
-    
+
     return (
         robot_position.tolist(),
         robot_orientation.tolist(),
@@ -110,11 +112,12 @@ def read_from_csv(directory):
 if __name__ == "__main__":
     # read dataframe
     directory = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/a.csv'
-    robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_from_csv(directory)
+    robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_from_csv(
+        directory)
 
-    # paremeter
+    # parameters
     gazebo_env = 'aws_house'
-    algo = 'dqn'
+    algo = 'dueling_ddqn'
     gamma = 0.99
     learning_rate = 0.01
     tau = 0.001
@@ -122,13 +125,14 @@ if __name__ == "__main__":
     save_interval = 5
     epochs = 10
     batch_size = 1
+    penalty = 0.5
 
     # create model
     model = Agent(algo, gazebo_env, gamma, learning_rate, tau, epsilon,
-                  save_interval, epochs, batch_size,
+                  save_interval, epochs, batch_size, penalty,
                   robot_positions, robot_orientations,
                   centroid_records, info_gain_records, best_centroids)
-    
+
     if algo == 'dqn':
         model.initialize_dqn()
     elif algo == 'ddqn':

@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 import random
-import pandas as pd
 from collections import deque
 
 
@@ -58,7 +57,7 @@ class ReplayBuffer:
 
 class DuelingDDQNAgent:
     def __init__(self, gazebo_env, gamma, learning_rate, tau, epsilon,
-                 save_interval, epochs, batch_size, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
+                 save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # Parameters
         self.robot_post_arr = robot_post_arr[0]
         self.robot_orie_arr = robot_orie_arr[0]
@@ -79,6 +78,7 @@ class DuelingDDQNAgent:
         self.save_interval = save_interval
         self.epochs = epochs
         self.batch_size = batch_size
+        self.penalty = penalty
 
         self.gazebo_env = gazebo_env
         self.filepath = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dueling_ddqn_{self.epochs}.pth"
@@ -119,7 +119,7 @@ class DuelingDDQNAgent:
         network_input = network_input.reshape(1, input_size)
 
         # Determine the output size based on the shape of the sorted centroid record
-        output_size = 5
+        output_size = sorted_centroid_record.shape[0]
 
         return network_input, output_size, sorted_centroid_record
 
@@ -236,8 +236,8 @@ class DuelingDDQNAgent:
 
                     # Add penalty if the predicted centroid matches [0, 0]
                     if torch.all(torch.eq(predicted_centroid, zero_centroid)):
-                        penalty = 0.5  # Adjust penalty value as needed
-                        loss += penalty
+                        # Adjust penalty value as needed
+                        loss += self.penalty
 
                     self.optimizer.zero_grad()
                     loss.backward()

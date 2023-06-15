@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 import random
-import pandas as pd
 from collections import deque
 
 
@@ -72,7 +71,7 @@ class ReplayBuffer:
 
 class DuelingDQNAgent:
     def __init__(self, gazebo_env, gamma, learning_rate, tau, epsilon,
-                 save_interval, epochs, batch_size, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
+                 save_interval, epochs, batch_size, penalty,robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         self.robot_post_arr = robot_post_arr[0]
         self.robot_orie_arr = robot_orie_arr[0]
         self.centr_arr = centr_arr[0]
@@ -92,6 +91,7 @@ class DuelingDQNAgent:
         self.save_interval = save_interval
         self.epochs = epochs
         self.batch_size = batch_size
+        self.penalty = penalty
 
         self.gazebo_env = gazebo_env
         self.filepath = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dueling_dqn_{self.epochs}.pth"
@@ -123,7 +123,7 @@ class DuelingDQNAgent:
             (robot_state, sorted_centroid_record.flatten(), sorted_info_gain_record.flatten()))
         input_size = network_input.numel()
         network_input = network_input.reshape(1, input_size)
-        output_size = 5
+        output_size = sorted_centroid_record.shape[0]
 
         return network_input, output_size, sorted_centroid_record
 
@@ -223,8 +223,7 @@ class DuelingDQNAgent:
                     loss = self.criterion(q_values, targets)
 
                     if torch.all(torch.eq(predicted_centroid, zero_centroid)):
-                        penalty = 0.5
-                        loss += penalty
+                        loss += self.penalty
 
                     self.optimizer.zero_grad()
                     loss.backward()
