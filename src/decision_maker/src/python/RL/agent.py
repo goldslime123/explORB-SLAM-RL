@@ -115,7 +115,7 @@ if __name__ == "__main__":
     directory = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/a.csv'
     robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_from_csv(
         directory)
-    print(centroid_records)
+    print(info_gain_records)
 
     # parameters
     gazebo_env = 'aws_house'

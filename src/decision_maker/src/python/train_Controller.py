@@ -101,6 +101,13 @@ def format_centroid_record(centroid_record):
 
     return centroid_empty_list
 
+def format_info_gain_record(info_gain_record): 
+    info_empty_list = [0 for _ in range(5)]
+    for i, sublist in enumerate(info_gain_record):
+        info_empty_list[i] = sublist
+
+    return info_empty_list
+
 def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv'
     folder_path = csv_folder_path + '/' + gazebo_env
@@ -123,6 +130,7 @@ def store_csv(robot_position, robot_orientation, centroid_record, info_gain_reco
 
 
     centroid_record = format_centroid_record(centroid_record)
+    info_gain_record = format_info_gain_record(info_gain_record)
     
 
     if os.path.exists(folder_path):

@@ -86,6 +86,11 @@ for i, sublist in enumerate(list_of_lists):
 
 print(empty_list)
 
+with open('/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/test/data.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow([result])
+
+
 
 def remove_exponents_from_string(number_string):
     numbers = number_string.split(',')
@@ -114,9 +119,11 @@ def string_to_float_matrix(string_matrix):
     float_matrix = ast.literal_eval(string_matrix)
     return float_matrix
 
+def convert_to_list_of_lists(lst):
+    list_of_lists = [[num] for num in lst]
+    return list_of_lists
+
 filename = "/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/test/c.csv"
-
-
 # Read the CSV file
 with open(filename, 'r') as file:
     reader = csv.reader(file)
@@ -136,8 +143,6 @@ with open(filename, 'r') as file:
         print("-------------------")
 
 # Example usage
-
-
 robot_position = string_to_float_list(robot_position)
 
 robot_orientation = remove_exponents_from_string(robot_orientation)
@@ -146,12 +151,9 @@ robot_orientation = string_to_float_list(robot_orientation)
 centroid_record = string_to_float_matrix(centroid_record)
 
 info_gain_record = string_to_float_matrix(info_gain_record)
+info_gain_record = convert_to_list_of_lists(info_gain_record)
 
 best_centroid = string_to_float_list2(best_centroid)
 
+
 print(robot_position,robot_orientation,centroid_record,info_gain_record,best_centroid)
-
-
-with open('/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/test/data.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow([result])
