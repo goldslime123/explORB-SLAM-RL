@@ -74,8 +74,34 @@ def does_row_exist(file_name, row_data):
                 return True  # Row exists in the CSV file
     return False
 
+def format_centroid_record(centroid_record):
+    centroid_empty_list = [[0, 0] for _ in range(5)]
+    for i, sublist in enumerate(centroid_record):
+        centroid_empty_list[i] = sublist
 
-def store_csv(robot_position, robot_orientation, centroid_str, info_gain_record):
+    centroid_empty_list=str(centroid_empty_list)
+    # Remove the word "array" from the string
+    centroid_empty_list = centroid_empty_list.replace('array', '')
+    # Remove all parentheses from the string
+    centroid_empty_list = centroid_empty_list.replace('(', '').replace(')', '')
+    # Remove the first and last brackets from the string
+    centroid_empty_list = centroid_empty_list[1:-1]
+
+    # Remove all empty spaces in the string
+    centroid_empty_list = centroid_empty_list.replace(" ", "")
+
+    # Remove the surrounding brackets from the string
+    centroid_empty_list = centroid_empty_list.strip('[]')
+
+    # Split the string into individual coordinate pairs
+    centroid_empty_list = centroid_empty_list.split('],[')
+
+    # Process each pair to create the list of lists
+    centroid_empty_list = [list(map(float, pair.split(','))) for pair in centroid_empty_list]
+
+    return centroid_empty_list
+
+def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv'
     folder_path = csv_folder_path + '/' + gazebo_env
     file_name = folder_path+'/'+str(shortened_number)+'.csv'
@@ -83,35 +109,46 @@ def store_csv(robot_position, robot_orientation, centroid_str, info_gain_record)
     row_data = ['robot_position', 'robot_orientation',
                 'centroid_record', 'info_gain_record']
     
+    # robot_position = np.array([robot_position])
+    # robot_orientation = np.array([robot_orientation])
+    # centroid_str = np.array([centroid_str])
+    # info_gain_record = np.array([info_gain_record])
+    # best_centroid = np.array([best_centroid])
+
+    robot_position = np.array2string(robot_position, separator=', ')[1:-1]
+    robot_position = robot_position.replace(' ', '')
+
+    robot_orientation = np.array2string(robot_orientation, separator=', ')[1:-1]
+    robot_orientation = robot_orientation.replace(' ', '')
+
+
+    centroid_record = format_centroid_record(centroid_record)
+    
 
     if os.path.exists(folder_path):
         print("The folder exists.")
-
         if os.path.exists(file_name):
             print(f"The file '{file_name}' exists.")
             with open(file_name, 'a', newline='') as file:
                 writer = csv.writer(file)
                 if does_row_exist(file_name, row_data):
-                    writer.writerows(
-                        [robot_position, robot_orientation, centroid_str, info_gain_record])
+                    writer.writerow(
+                        [robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid])
                 else:
-                    writer.writerow(['robot_position', 'robot_orientation',
-                                     'centroid_record', 'info_gain_record'])
-                    writer.writerows(
-                        [robot_position, robot_orientation, centroid_str, info_gain_record])
+                    writer.writerow(
+                        [robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid])
 
         else:
             print(f"The file '{file_name}' does not exist. Creating file.")
-            with open(file_name, 'a', newline='') as file:
+            with open(file_name, 'w', newline='') as file:
                 writer = csv.writer(file)
                 if does_row_exist(file_name, row_data):
-                    writer.writerows(
-                        [robot_position, robot_orientation, centroid_str, info_gain_record])
+                    writer.writerow(
+                        [robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid])
                 else:
-                    writer.writerow(['robot_position', 'robot_orientation',
-                                     'centroid_record', 'info_gain_record'])
-                    writer.writerows(
-                        [robot_position, robot_orientation, centroid_str, info_gain_record])
+                    writer.writerow(['robot_position', 'robot_orientation', 'centroid_record', 'info_gain_record','best_centroid'])
+                    writer.writerow(
+                        [robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid])
     else:
         print("The folder does not exist.")
         os.makedirs(folder_path, exist_ok=True)
