@@ -90,7 +90,7 @@ class Agent:
 
 
 def read_csv(directory):
-    # Read the CSV file
+    # Read the CSV file using panda
     df = pd.read_csv(directory, sep=';', header=None)
 
     # Extract specified columns
@@ -112,27 +112,6 @@ def read_csv(directory):
     )
 
 
-# def read_csv2(directory):
-#     """Reads the input data from a CSV file."""
-
-#     raw_data = pd.read_csv(directory, sep=" ", header=None)
-
-#     robot_position = raw_data[0].apply(
-#         lambda x: [float(i) for i in x.split(",")])
-#     robot_orientation = raw_data[1].apply(
-#         lambda x: [float(i) for i in x.split(",")])
-#     centroid_record = raw_data[2].apply(ast.literal_eval)
-#     info_gain_record = raw_data[3].apply(ast.literal_eval)
-#     best_centroid = raw_data[4].apply(ast.literal_eval)
-
-
-#     return (
-#         robot_position.tolist(),
-#         robot_orientation.tolist(),
-#         centroid_record.tolist(),
-#         info_gain_record.tolist(),
-#         best_centroid.tolist()
-#     )
 if __name__ == "__main__":
     # read dataframe
     directory = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv/aws_house/ed1a5e3.csv'
