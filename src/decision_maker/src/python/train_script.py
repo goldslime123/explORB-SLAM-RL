@@ -6,6 +6,9 @@ import time
 import rospy
 import signal
 
+repeat_count = 1
+gazebo_env = 'aws_house'
+
 class ActiveSLAM:
     def __init__(self, repeat_count, explore_time, decision_maker, gazebo_env):
         self.repeat_count = repeat_count
@@ -86,10 +89,8 @@ class ActiveSLAM:
 
 def initialize_active_slam():
     # Initialize the ActiveSLAM object
-    repeat_count = 1
     explore_time = 100
     decision_maker = 'train_autonomous_agent'
-    gazebo_env = 'aws_house'
     active_slam = ActiveSLAM(repeat_count, explore_time, decision_maker, gazebo_env)
     return active_slam
 

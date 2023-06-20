@@ -41,6 +41,7 @@ from WeightedPoseGraph import WeightedPoseGraph
 import os
 import csv
 import uuid
+from train_script import gazebo_env,repeat_count
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Callbacks~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,7 +141,6 @@ def format_best_centroid(best_centroid):
 unique_number = uuid.uuid4()
 shortened_number = str(unique_number)[:7]
 def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
-    gazebo_env = 'aws_house'
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv'
     folder_path = csv_folder_path + '/' + gazebo_env
     file_name = folder_path + '/' + str(shortened_number) + '.csv'
