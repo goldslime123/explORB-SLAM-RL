@@ -6,21 +6,25 @@ from dueling_ddqn import DuelingDDQNAgent
 from csv_handler import *
 from agent import *
 
-# parameters
-gazebo_env = 'aws_house'
-algo = 'dqn'
-gamma = 0.99
-learning_rate = 0.01
-tau = 0.001
-epsilon = 0.5
-save_interval = 5
-epochs = 10
-batch_size = 1
-penalty = 0.5
+import sys
+sys.path.append('/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/')
+from variables import *
 
-folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv/' + gazebo_env
-output_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/' + \
-    gazebo_env + '.csv'
+# parameters
+# gazebo_env = 'aws_house'
+# algo = 'dqn'
+# gamma = 0.99
+# learning_rate = 0.01
+# tau = 0.001
+# epsilon = 0.5
+# save_interval = 5
+# epochs = 10
+# batch_size = 1
+# penalty = 0.5
+
+# folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv/' + gazebo_env
+# output_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/' + \
+#     gazebo_env + '.csv'
 
 
 def train_model():
@@ -59,9 +63,9 @@ def train_model():
 if __name__ == "__main__":
     train_model()
 
-    robot_position = 1.6998447315016334, 3.52581991835878
-    robot_orientation = - \
-        0.0030015861938741785, 0.002416949504063036, 0.8137270796538675, 0.5812343736311842
-    centroid_record = [
-        4.20577174, -1.40001973], [0.58587992, -0.60072875], [0, 0], [0, 0], [0, 0]
-    info_gain_record = [8.421770797635304], [148.53895792332335], [0], [0], [0]
+    # robot_position = 1.6998447315016334, 3.52581991835878
+    # robot_orientation = - \
+    #     0.0030015861938741785, 0.002416949504063036, 0.8137270796538675, 0.5812343736311842
+    # centroid_record = [
+    #     4.20577174, -1.40001973], [0.58587992, -0.60072875], [0, 0], [0, 0], [0, 0]
+    # info_gain_record = [8.421770797635304], [148.53895792332335], [0], [0], [0]

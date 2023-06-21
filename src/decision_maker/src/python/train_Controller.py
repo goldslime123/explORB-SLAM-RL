@@ -41,7 +41,8 @@ from WeightedPoseGraph import WeightedPoseGraph
 import os
 import csv
 import uuid
-from train_script import gazebo_env
+import re
+from variables import gazebo_env
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Callbacks~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,6 +130,9 @@ def format_best_centroid(best_centroid):
     best_centroid = best_centroid.rstrip()
 
     best_centroid = best_centroid.replace(" ", ",")
+
+    best_centroid = re.sub(r',,', ',', best_centroid)
+
     best_centroid = '[' + best_centroid + ']'
 
     return best_centroid

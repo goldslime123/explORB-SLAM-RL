@@ -48,7 +48,7 @@ sys.path.append('/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python
 # call agent
 from agent import *
 # call paremeter of agent
-from train_model import *
+from variables import *
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
