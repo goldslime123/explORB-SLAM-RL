@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
-#import libraries
 import subprocess
 import time
 import rospy
 import signal
 
+# paremeters
 repeat_count = 1
 gazebo_env = 'aws_house'
+explore_time = 100
+decision_maker = 'train_autonomous_agent'
 
 class ActiveSLAM:
     def __init__(self, repeat_count, explore_time, decision_maker, gazebo_env):
@@ -89,8 +91,6 @@ class ActiveSLAM:
 
 def initialize_active_slam():
     # Initialize the ActiveSLAM object
-    explore_time = 100
-    decision_maker = 'train_autonomous_agent'
     active_slam = ActiveSLAM(repeat_count, explore_time, decision_maker, gazebo_env)
     return active_slam
 

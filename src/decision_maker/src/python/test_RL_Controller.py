@@ -43,6 +43,14 @@ import csv
 import uuid
 from train_script import gazebo_env
 
+import sys
+sys.path.append('/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL')
+# call agent
+from agent import *
+# call paremeter of agent
+from train_model import *
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Callbacks~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -472,8 +480,8 @@ def node():
                     robot_position = robot_.getPose()[0]
                     robot_orientation = robot_.getPose()[1]
 
-                    store_csv(robot_position, robot_orientation,
-                              centroid_record, info_gain_record, centroid_record[winner_id])
+                    # store_csv(robot_position, robot_orientation,
+                    #           centroid_record, info_gain_record, centroid_record[winner_id])
 
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
