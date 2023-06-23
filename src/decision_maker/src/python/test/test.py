@@ -153,19 +153,20 @@ import torch
 # print(f"Best Centroid: {best_centroid}")
 # print("-------------------")
 
-# robot_position = 1.6998447315016334,3.52581991835878
-# robot_orientation = -0.0030015861938741785,0.002416949504063036,0.8137270796538675,0.5812343736311842
-# centroid_record = [4.20577174,-1.40001973],[0.58587992,-0.60072875],[0,0],[0,0],[0,0]
-# info_gain_record=[8.421770797635304],[148.53895792332335],[0],[0],[0]
+robot_position = [1.6998447315016334,3.52581991835878]
+robot_orientation = [-0.0030015861938741785,0.002416949504063036,0.8137270796538675,0.5812343736311842]
+centroid_record = [4.20577174,-1.40001973],[0.58587992,-0.60072875],[0,0],[0,0],[0,0]
+info_gain_record=[8.421770797635304],[148.53895792332335],[0],[0],[0]
 
 
-# robot_position = torch.tensor(robot_position, dtype=torch.float32)
-# robot_orientation = torch.tensor(robot_orientation, dtype=torch.float32)
-# centroid_record = torch.tensor(centroid_record, dtype=torch.float32)
-# info_gain_record = torch.tensor(info_gain_record, dtype=torch.float32)
-# robot_state = torch.cat((robot_position, robot_orientation))
+robot_position = torch.tensor(robot_position, dtype=torch.float32)
+robot_orientation = torch.tensor(robot_orientation, dtype=torch.float32)
+centroid_record = torch.tensor(centroid_record, dtype=torch.float32)
+info_gain_record = torch.tensor(info_gain_record, dtype=torch.float32)
+robot_state = torch.cat((robot_position, robot_orientation))
 
-# # print(robot_state)
+
+print(robot_state)
 # import pandas as pd
 
 

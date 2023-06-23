@@ -272,7 +272,8 @@ class DQNAgent:
     def predict_centroid(self, robot_position, robot_orientation, centroid_records, info_gain_records):
         """Predicts the best centroid based on the given robot position and orientation using the target network."""
         self.load_model()
-
+        
+        # print(type(robot_position))
         centr_arr = [[1, 2], [3, 4], [0, 0], [0, 0], [0, 0]]
         info_arr = [[10], [20], [0], [0], [0]]
 

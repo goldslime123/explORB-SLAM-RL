@@ -10,6 +10,17 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Include modules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# libraries
+import csv
+from train_script import gazebo_env
+
+import sys
+sys.path.append(
+    '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL')
+from agent import *
+from variables import output_size, algo, gazebo_env, gamma, learning_rate, tau, epsilon, save_interval, epochs, batch_size, penalty
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 import rospy
 import tf
 import heapq
@@ -37,18 +48,7 @@ from Robot import Robot
 from Map import Map
 from WeightedPoseGraph import WeightedPoseGraph
 
-# libraries
-import os
-import csv
-import uuid
-from train_script import gazebo_env
 
-import sys
-sys.path.append('/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL')
-# call agent
-from agent import *
-# call paremeter of agent
-from variables import *
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,6 +64,7 @@ is_lost_ = False
 is_relocalizing_ = False
 goal_cancel_pub_ = rospy.Publisher(
     '/robot_1/move_base/cancel', GoalID, queue_size=10)
+
 
 def does_row_exist(file_name, row_data):
     with open(file_name, 'r', newline='') as file:
@@ -94,7 +95,7 @@ def format_centroid_record(centroid_record, size):
 
 
 def format_info_gain_record(info_gain_record, size):
-    info_empty_list = [[0] for _ in range(size)]
+    info_empty_list = [0 for _ in range(size)]
     for i, sublist in enumerate(info_gain_record):
         info_empty_list[i] = sublist
 
@@ -106,22 +107,24 @@ def format_info_gain_record(info_gain_record, size):
     output_list = []
     for element in elements:
         element = element.strip()  # Remove leading and trailing whitespace
-        
+
         if element != "[0]":  # Add brackets if element is not [0]
             element = f"[{element.strip('[]')}]"
-        
+
         output_list.append(element)
 
     # Join the elements back into a string
     output_string = ", ".join(output_list)
     output_string = '[' + output_string + ']'
 
-    return output_string
+    return info_empty_list
 
 
 def format_robot_post_orientation(pose):
+    # print(pose)
     pose = np.array2string(pose, separator=', ')[1:-1]
     pose = pose.replace(' ', '')
+    pose = pose.replace(",,", ",")
     pose = '[' + pose + ']'
     return pose
 
@@ -141,47 +144,84 @@ def format_best_centroid(best_centroid):
 
     return best_centroid
 
-# Generate a unique number (UUID)
-unique_number = uuid.uuid4()
-shortened_number = str(unique_number)[:7]
-def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
-    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv'
-    folder_path = csv_folder_path + '/' + gazebo_env
-    file_name = folder_path + '/' + str(shortened_number) + '.csv'
 
-    # # output size 
-    # if len(info_gain_record) > 5:
-    #     size = len(info_gain_record)
-    # else:
-    #     size = 5
+def format_list_of_list(string):
 
-    size = 6
+    # print(string)
+
+    string = string.strip("[]")
+    string = string.replace(",,", ",")
+
+    string_values = string.split(",")
+    values = [float(value.strip()) for value in string_values]
+
+    my_list = [values]
+
+    return my_list
+
+
+def format_tuple(str_list):
+    str_list = str(str_list)
+
+    # Evaluate the string as a Python object
+    values = ast.literal_eval(str_list)
+
+    # Convert the list of lists to a list containing a single tuple
+    my_list = [tuple(values)]
+
+    return my_list
+
+
+def format_tuple_list_of_list(my_list, size):
+    num_brackets = size
+
+    new_list = [tuple([item] if idx < num_brackets else item for idx,
+                      item in enumerate(sublist)) for sublist in my_list]
+
+    return new_list
+
+
+def test_model(robot_position, robot_orientation,
+               centroid_record, info_gain_record, best_centroid):
 
     robot_position = format_robot_post_orientation(robot_position)
     robot_orientation = format_robot_post_orientation(robot_orientation)
-    centroid_record = format_centroid_record(centroid_record, size)
-    info_gain_record = format_info_gain_record(info_gain_record, size)
+
+    
+    centroid_record = format_centroid_record(centroid_record, output_size)
+    info_gain_record = format_info_gain_record(info_gain_record, output_size)
     best_centroid = format_best_centroid(best_centroid)
 
-    if os.path.exists(folder_path):
-        print("The folder exists.")
-        if os.path.exists(file_name):
-            print(f"The file '{file_name}' exists.")
-            with open(file_name, 'a', newline='') as file:
-                writer = csv.writer(file, delimiter=';')
-                writer.writerow(
-                    [robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid])
+    robot_position = format_list_of_list(robot_position)
+    robot_orientation = format_list_of_list(robot_orientation)
 
-        else:
-            print(f"The file '{file_name}' does not exist. Creating file.")
-            with open(file_name, 'w', newline='') as file:
-                writer = csv.writer(file, delimiter=';')
-                writer.writerow(
-                    [robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid])
-    else:
-        print("The folder does not exist.")
-        os.makedirs(folder_path, exist_ok=True)
-        print(f"Folder '{folder_path}' created successfully.")
+    centroid_record = format_tuple(centroid_record)
+
+    info_gain_record = format_tuple(info_gain_record)
+    info_gain_record = format_tuple_list_of_list(
+        info_gain_record, output_size)
+
+    best_centroid = format_list_of_list(best_centroid)
+
+    # print(robot_position, robot_orientation,
+    #       centroid_record, info_gain_record, best_centroid)
+
+    #  create model
+    model = Agent(algo, gazebo_env, gamma, learning_rate, tau, epsilon,
+                  save_interval, epochs, batch_size, penalty,
+                  robot_position, robot_orientation,
+                  centroid_record, info_gain_record, best_centroid)
+
+    # return tensor
+    predicted_centroid, predicted_centroid_index = model.predict_centroid(robot_position[0], robot_orientation[0],
+                                                   centroid_record[0], info_gain_record[0])
+
+
+    # tensor to list
+    predicted_centroid = predicted_centroid.tolist()
+    predicted_centroid_index = predicted_centroid_index.tolist()
+
+    return predicted_centroid, predicted_centroid_index
 
 
 def mapPointsCallBack(data):
@@ -272,7 +312,7 @@ def node():
     rate_hz = rospy.get_param('~rate', 100)
     delay_after_assignment = rospy.get_param('~delay_after_assignment', 0.1)
     show_debug_path = rospy.get_param('~show_debug_path', False)
-    exploring_time = rospy.get_param('~max_exploring_time', 9000)
+    exploring_time = rospy.get_param('~max_exploring_time', 9000) # 150 mins
     use_gpu = rospy.get_param('~enable_gpu_comp', True)
     camera_type = rospy.get_param('~camera_type', 'rgbd')
 
@@ -325,7 +365,7 @@ def node():
 
         # Check temporal stopping criterion
         t_f = rospy.get_time() - t_0  # Get ROS time in seconds
-        rospy.loginfo("Current time t_f: %f ", t_f)
+        rospy.loginfo("Current time ROS: %f ", t_f)
 
         if t_f >= exploring_time:
             robot_.cancelGoal()
@@ -346,12 +386,12 @@ def node():
 
         if not is_lost_:  # ORB-SLAM OK
             centroids = deepcopy(frontiers_)
-
             n_centroids = len(centroids)
+
             if n_centroids <= 0:
                 rospy.logwarn_throttle(
                     0.5, rospy.get_name() + ": No frontiers.")
-                # ending_cond= rospy.logwarn_throttle(0.5, rospy.get_name() + ": No frontiers.")
+               
                 if ig_changer < 10:
                     ig_changer += 1
                 client = dynamic_reconfigure.client.Client(
@@ -463,25 +503,28 @@ def node():
                     info_centroid_record = dict(
                         zip(info_gain_record, centroid_record))
 
-                    robo_pose = robot_.getPoseAsGeometryMsg()
-                    print("robot pose", robo_pose)
+                    robot_pose = robot_.getPoseAsGeometryMsg()
+                    print("Robot Pose: \n", robot_pose)
 
                     rospy.loginfo(rospy.get_name() +
-                                  ": Frontiers: \n" + format(centroid_record))
+                                  ": Centroids: \n" + format(centroid_record))
                     rospy.loginfo(
                         rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
 
                     rospy.loginfo(
-                        rospy.get_name() + ": Info gain/Frontier: \n" + format(info_centroid_record))
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to frontier " +
+                        rospy.get_name() + ": Info gain/Centroid: \n" + format(info_centroid_record))
+                    
+                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to centroid " +
                                   format(centroid_record[winner_id]))
 
                     # Get robot's current pose
                     robot_position = robot_.getPose()[0]
                     robot_orientation = robot_.getPose()[1]
 
-                    # store_csv(robot_position, robot_orientation,
-                    #           centroid_record, info_gain_record, centroid_record[winner_id])
+                    predicted_centroid, predicted_centroid_index = test_model(
+                        robot_position, robot_orientation, centroid_record, info_gain_record, centroid_record[winner_id])
+                    
+                    print("Predicted Centroid: " + str(predicted_centroid))
 
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()

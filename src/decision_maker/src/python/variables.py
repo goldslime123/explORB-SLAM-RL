@@ -4,6 +4,7 @@ gazebo_env = 'aws_house'
 explore_time = 100
 decision_maker = 'train_autonomous_agent'
 
+output_size = 6 
 
 # agents
 algo = 'dqn'

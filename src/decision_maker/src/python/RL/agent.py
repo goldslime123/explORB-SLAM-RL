@@ -91,3 +91,37 @@ class Agent:
 
     def predict_centroid(self, robot_position, robot_orientation, centroid_records, info_gain_records):
         return self.model.predict_centroid(robot_position, robot_orientation, centroid_records, info_gain_records)
+
+
+# if __name__ == "__main__":
+#     gazebo_env = 'aws_house'
+#     algo = 'dqn'
+#     gamma = 0.99
+#     learning_rate = 0.01
+#     tau = 0.001
+#     epsilon = 0.5
+#     save_interval = 5
+#     epochs = 10
+#     batch_size = 1
+#     penalty = 0.5
+
+#     robot_position = [[0.11, 2.5]] 
+#     robot_orientation = [[1.0, 0.00222544, 0.92653255, -0.37618656]]
+#     centroid_records = [([4.20577174,-1.40001973],[0.58587992,-0.60072875],[0,0],[0,0],[0,0],[0,0])]
+#     info_gain_records=[([8.421770797635304],[148.53895792332335],[0],[0],[0],[0])]
+#     best_centroid = [[4.20577174,-1.40001973]]
+
+#     # robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_csv(
+#     #     output_path)
+#     # print(robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids)
+
+#     # create model
+#     model = Agent(algo, gazebo_env, gamma, learning_rate, tau, epsilon,
+#                   save_interval, epochs, batch_size, penalty,
+#                   robot_position, robot_orientation,
+#                   centroid_records, info_gain_records, best_centroid)
+    
+#     predicted_centroid,_ = model.predict_centroid(robot_position[0], robot_orientation[0],
+#                 centroid_records[0], info_gain_records[0])
+#     print(predicted_centroid)
+   

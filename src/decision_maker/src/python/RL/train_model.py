@@ -32,7 +32,7 @@ def train_model():
     # read dataframe
     robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_csv(
         output_path)
-    # print(robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids)
+    print(robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids)
 
     # create model
     model = Agent(algo, gazebo_env, gamma, learning_rate, tau, epsilon,

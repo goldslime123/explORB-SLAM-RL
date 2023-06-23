@@ -298,24 +298,25 @@ def node():
                         info_gain_record.append(info_gain[ip])
                         centroid_record.append(centroids[ip])
 
-                    winner_id = info_gain_record.index(np.max(info_gain_record))
-                    info_centroid_record = dict(zip(info_gain_record, centroid_record))
-                    
-                    rospy.loginfo(rospy.get_name() + ": Frontiers: \n" + format(centroid_record))
-                    rospy.loginfo(rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
+                    winner_id = info_gain_record.index(
+                        np.max(info_gain_record))
+                    info_centroid_record = dict(
+                        zip(info_gain_record, centroid_record))
 
-                    rospy.loginfo(rospy.get_name() + ": Info gain/Frontier: \n" + format(info_centroid_record)) 
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to frontier " +
+                    robot_pose = robot_.getPoseAsGeometryMsg()
+                    print("Robot Pose: \n", robot_pose)
+
+                    rospy.loginfo(rospy.get_name() +
+                                  ": Centroids: \n" + format(centroid_record))
+                    rospy.loginfo(
+                        rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
+
+                    rospy.loginfo(
+                        rospy.get_name() + ": Info gain/Centroid: \n" + format(info_centroid_record))
+                    
+                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to centroid " +
                                   format(centroid_record[winner_id]))
                     
-                    # Get robot's current pose
-                    robot_position = robot_.getPose()[0]
-                    robot_orientation = robot_.getPose()[1]
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " position " +
-                                  format(robot_position))
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " orientation " +
-                                  format(robot_orientation))
-
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
                     robot_.sendGoal(centroid_record[winner_id], True)

@@ -10,17 +10,21 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Include modules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# libraries
+import os
+import csv
+import uuid
+import re
+from variables import gazebo_env,output_size
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import rospy
 import tf
 import heapq
 import numpy as np
 import dynamic_reconfigure.client
-
-
 from numpy import array
 from copy import deepcopy
 from scipy.spatial.transform import Rotation
-
 from frontier_detector.msg import PointArray
 from nav_msgs.msg import OccupancyGrid
 """
@@ -36,14 +40,6 @@ from Functions import waitEnterKey, quaternion2euler, cellInformation_NUMBA, cel
 from Robot import Robot
 from Map import Map
 from WeightedPoseGraph import WeightedPoseGraph
-
-# libraries
-import os
-import csv
-import uuid
-import re
-from variables import gazebo_env
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Callbacks~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,6 +111,7 @@ def format_info_gain_record(info_gain_record, size):
 def format_robot_post_orientation(pose):
     pose = np.array2string(pose, separator=', ')[1:-1]
     pose = pose.replace(' ', '')
+    pose = pose.replace(",,", ",")
     pose = '[' + pose + ']'
     return pose
 
@@ -145,18 +142,10 @@ def store_csv(robot_position, robot_orientation, centroid_record, info_gain_reco
     folder_path = csv_folder_path + '/' + gazebo_env
     file_name = folder_path + '/' + str(shortened_number) + '.csv'
 
-    # # output size 
-    # if len(info_gain_record) > 5:
-    #     size = len(info_gain_record)
-    # else:
-    #     size = 5
-
-    size = 6
-
     robot_position = format_robot_post_orientation(robot_position)
     robot_orientation = format_robot_post_orientation(robot_orientation)
-    centroid_record = format_centroid_record(centroid_record, size)
-    info_gain_record = format_info_gain_record(info_gain_record, size)
+    centroid_record = format_centroid_record(centroid_record, output_size)
+    info_gain_record = format_info_gain_record(info_gain_record, output_size)
     best_centroid = format_best_centroid(best_centroid)
 
     if os.path.exists(folder_path):
@@ -459,23 +448,25 @@ def node():
                     info_centroid_record = dict(
                         zip(info_gain_record, centroid_record))
 
-                    robo_pose = robot_.getPoseAsGeometryMsg()
-                    print("robot pose", robo_pose)
+                    robot_pose = robot_.getPoseAsGeometryMsg()
+                    print("Robot Pose: \n", robot_pose)
 
                     rospy.loginfo(rospy.get_name() +
-                                  ": Frontiers: \n" + format(centroid_record))
+                                  ": Centroids: \n" + format(centroid_record))
                     rospy.loginfo(
                         rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
 
                     rospy.loginfo(
-                        rospy.get_name() + ": Info gain/Frontier: \n" + format(info_centroid_record))
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to frontier " +
+                        rospy.get_name() + ": Info gain/Centroid: \n" + format(info_centroid_record))
+                    
+                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to centroid " +
                                   format(centroid_record[winner_id]))
 
                     # Get robot's current pose
                     robot_position = robot_.getPose()[0]
                     robot_orientation = robot_.getPose()[1]
 
+                    # store csv
                     store_csv(robot_position, robot_orientation,
                               centroid_record, info_gain_record, centroid_record[winner_id])
 
