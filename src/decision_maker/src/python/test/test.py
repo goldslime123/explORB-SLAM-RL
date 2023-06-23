@@ -153,22 +153,27 @@ import torch
 # print(f"Best Centroid: {best_centroid}")
 # print("-------------------")
 
-robot_position = [1.6998447315016334,3.52581991835878]
-robot_orientation = [-0.0030015861938741785,0.002416949504063036,0.8137270796538675,0.5812343736311842]
-centroid_record = [4.20577174,-1.40001973],[0.58587992,-0.60072875],[0,0],[0,0],[0,0]
-info_gain_record=[8.421770797635304],[148.53895792332335],[0],[0],[0]
+# robot_position = [1.6998447315016334,3.52581991835878]
+# robot_orientation = [-0.0030015861938741785,0.002416949504063036,0.8137270796538675,0.5812343736311842]
+# centroid_record = [4.20577174,-1.40001973],[0.58587992,-0.60072875],[0,0],[0,0],[0,0]
+# info_gain_record=[8.421770797635304],[148.53895792332335],[0],[0],[0]
 
 
-robot_position = torch.tensor(robot_position, dtype=torch.float32)
-robot_orientation = torch.tensor(robot_orientation, dtype=torch.float32)
-centroid_record = torch.tensor(centroid_record, dtype=torch.float32)
-info_gain_record = torch.tensor(info_gain_record, dtype=torch.float32)
-robot_state = torch.cat((robot_position, robot_orientation))
+# robot_position = torch.tensor(robot_position, dtype=torch.float32)
+# robot_orientation = torch.tensrobot_position = [1.6998447315016334,3.52581991835878]
+# robot_orientation = [-0.0030015861938741785,0.002416949504063036,0.8137270796538675,0.5812343736311842]
+# centroid_record = [4.20577174,-1.40001973],[0.58587992,-0.60072875],[0,0],[0,0],[0,0]
+# info_gain_record=[8.421770797635304],[148.53895792332335],[0],[0],[0]
 
 
-print(robot_state)
-# import pandas as pd
+# robot_position = torch.tensor(robot_position, dtype=torch.float32)
+# robot_orientation = torch.tensor(robot_orientation, dtype=torch.float32)
+# centroid_record = torch.tensor(centroid_record, dtype=torch.float32)
+# info_gain_record = torch.tensor(info_gain_record, dtype=torch.float32)
+# robot_state = torch.cat((robot_position, robot_orientation))
 
+
+# print(robot_state)
 
 # def read_csv(directory):
 #     # Read the CSV file
@@ -206,3 +211,59 @@ print(robot_state)
 #         info_gain_record.tolist(),
 #         best_centroid.tolist()
 #     )
+
+
+
+
+
+# import rospy
+# from sensor_msgs.msg import Image
+# from cv_bridge import CvBridge
+# import cv2
+
+# bridge = CvBridge()
+
+# def image_callback(msg):
+#     try:
+#         # Convert ROS Image message to OpenCV format
+#         cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+        
+#         # Save the image
+#         save_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/rviz/test.png'
+#         cv2.imwrite(save_path, cv_image)
+#         print("Image saved to", save_path)
+#     except Exception as e:
+#         print("Error processing image:", str(e))
+
+# rospy.init_node('rviz_image_saver')
+# image_topic = '/gridmapper/rectified_map' 
+# rospy.Subscriber(image_topic, Image, image_callback)
+
+# rospy.spin()
+
+import rospy
+from nav_msgs.msg import OccupancyGrid
+import numpy as np
+import cv2
+
+def occupancy_grid_callback(msg):
+    # Extract occupancy grid data
+    width = msg.info.width
+    height = msg.info.height
+    data = np.array(msg.data).reshape((height, width))
+
+    # Convert occupancy grid to grayscale image
+    image = (data * 255 / 100).astype(np.uint8)
+
+    # Save the image
+    save_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/rviz/test.png'
+    cv2.imwrite(save_path, image)
+    print("Image saved to", save_path)
+
+rospy.init_node('occupancy_grid_saver')
+occupancy_grid_topic = '/gridmapper/rectified_map' 
+rospy.Subscriber(occupancy_grid_topic, OccupancyGrid, occupancy_grid_callback)
+
+rospy.spin()
+
+

@@ -11,44 +11,39 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Include modules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # libraries
+from WeightedPoseGraph import WeightedPoseGraph
+from Map import Map
+from Robot import Robot
+from Functions import waitEnterKey, quaternion2euler, cellInformation_NUMBA, cellInformation, yawBtw2Points
+from orb_slam2_ros.msg import ORBState
+from actionlib_msgs.msg import GoalID
+from visualization_msgs.msg import MarkerArray
+from geometry_msgs.msg import Pose
+from std_msgs.msg import Float64MultiArray
+from nav_msgs.msg import OccupancyGrid
+from frontier_detector.msg import PointArray
+from scipy.spatial.transform import Rotation
+from copy import deepcopy
+from numpy import array
+import dynamic_reconfigure.client
+import numpy as np
+import heapq
+import tf
+import rospy
+from variables import output_size, algo, gazebo_env, gamma, learning_rate, tau, epsilon, save_interval, epochs, batch_size, penalty
+from agent import *
 import csv
 from train_script import gazebo_env
-
+import re
 import sys
 sys.path.append(
     '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL')
-from agent import *
-from variables import output_size, algo, gazebo_env, gamma, learning_rate, tau, epsilon, save_interval, epochs, batch_size, penalty
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import rospy
-import tf
-import heapq
-import numpy as np
-import dynamic_reconfigure.client
 
-
-from numpy import array
-from copy import deepcopy
-from scipy.spatial.transform import Rotation
-
-from frontier_detector.msg import PointArray
-from nav_msgs.msg import OccupancyGrid
 """
 from sensor_msgs.msg import PointCloud2
 """
-from std_msgs.msg import Float64MultiArray
-from geometry_msgs.msg import Pose
-from visualization_msgs.msg import MarkerArray
-from actionlib_msgs.msg import GoalID
-from orb_slam2_ros.msg import ORBState
-
-from Functions import waitEnterKey, quaternion2euler, cellInformation_NUMBA, cellInformation, yawBtw2Points
-from Robot import Robot
-from Map import Map
-from WeightedPoseGraph import WeightedPoseGraph
-
-
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,6 +71,7 @@ def does_row_exist(file_name, row_data):
 
 
 def format_centroid_record(centroid_record, size):
+    # print(centroid_record)
     centroid_empty_list = [[0, 0] for _ in range(size)]
     for i, sublist in enumerate(centroid_record):
         centroid_empty_list[i] = sublist
@@ -120,29 +116,32 @@ def format_info_gain_record(info_gain_record, size):
     return info_empty_list
 
 
-def format_robot_post_orientation(pose):
-    # print(pose)
-    pose = np.array2string(pose, separator=', ')[1:-1]
-    pose = pose.replace(' ', '')
-    pose = pose.replace(",,", ",")
-    pose = '[' + pose + ']'
-    return pose
+# def format_robot_post_orientation(pose):
+#     # print(pose)
+#     pose = np.array2string(pose, separator=', ')[1:-1]
+#     pose = pose.replace(' ', '')
+#     pose = pose.replace(",,", ",")
+#     pose = '[' + pose + ']'
+#     return pose
 
 
-def format_best_centroid(best_centroid):
-    best_centroid = str(best_centroid)
+def format_list(string):
+    string = str(string)
     # Remove the first and last brackets from the string
-    best_centroid = best_centroid[1:-1]
+    string = string[1:-1]
 
     # Remove empty spaces from the front
-    best_centroid = best_centroid.lstrip()
+    string = string.lstrip()
 
-    best_centroid = best_centroid.rstrip()
+    string = string.rstrip()
 
-    best_centroid = best_centroid.replace(" ", ",")
-    best_centroid = '[' + best_centroid + ']'
+    string = string.replace(" ", ",")
 
-    return best_centroid
+    string = re.sub(r',,', ',', string)
+
+    string = '[' + string + ']'
+
+    return string
 
 
 def format_list_of_list(string):
@@ -184,23 +183,21 @@ def format_tuple_list_of_list(my_list, size):
 def test_model(robot_position, robot_orientation,
                centroid_record, info_gain_record, best_centroid):
 
-    robot_position = format_robot_post_orientation(robot_position)
-    robot_orientation = format_robot_post_orientation(robot_orientation)
-
-    
-    centroid_record = format_centroid_record(centroid_record, output_size)
-    info_gain_record = format_info_gain_record(info_gain_record, output_size)
-    best_centroid = format_best_centroid(best_centroid)
-
+    robot_position = format_list(robot_position)
     robot_position = format_list_of_list(robot_position)
+
+    robot_orientation = format_list(robot_orientation)
     robot_orientation = format_list_of_list(robot_orientation)
 
+    centroid_record = format_centroid_record(centroid_record, output_size)
     centroid_record = format_tuple(centroid_record)
 
+    info_gain_record = format_info_gain_record(info_gain_record, output_size)
     info_gain_record = format_tuple(info_gain_record)
     info_gain_record = format_tuple_list_of_list(
         info_gain_record, output_size)
 
+    best_centroid = format_list(best_centroid)
     best_centroid = format_list_of_list(best_centroid)
 
     # print(robot_position, robot_orientation,
@@ -214,8 +211,7 @@ def test_model(robot_position, robot_orientation,
 
     # return tensor
     predicted_centroid, predicted_centroid_index = model.predict_centroid(robot_position[0], robot_orientation[0],
-                                                   centroid_record[0], info_gain_record[0])
-
+                                                                          centroid_record[0], info_gain_record[0])
 
     # tensor to list
     predicted_centroid = predicted_centroid.tolist()
@@ -312,7 +308,7 @@ def node():
     rate_hz = rospy.get_param('~rate', 100)
     delay_after_assignment = rospy.get_param('~delay_after_assignment', 0.1)
     show_debug_path = rospy.get_param('~show_debug_path', False)
-    exploring_time = rospy.get_param('~max_exploring_time', 9000) # 150 mins
+    exploring_time = rospy.get_param('~max_exploring_time', 9000)  # 150 mins
     use_gpu = rospy.get_param('~enable_gpu_comp', True)
     camera_type = rospy.get_param('~camera_type', 'rgbd')
 
@@ -391,7 +387,7 @@ def node():
             if n_centroids <= 0:
                 rospy.logwarn_throttle(
                     0.5, rospy.get_name() + ": No frontiers.")
-               
+
                 if ig_changer < 10:
                     ig_changer += 1
                 client = dynamic_reconfigure.client.Client(
@@ -513,7 +509,7 @@ def node():
 
                     rospy.loginfo(
                         rospy.get_name() + ": Info gain/Centroid: \n" + format(info_centroid_record))
-                    
+
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to centroid " +
                                   format(centroid_record[winner_id]))
 
@@ -523,7 +519,7 @@ def node():
 
                     predicted_centroid, predicted_centroid_index = test_model(
                         robot_position, robot_orientation, centroid_record, info_gain_record, centroid_record[winner_id])
-                    
+
                     print("Predicted Centroid: " + str(predicted_centroid))
 
                     # Send goal to robot

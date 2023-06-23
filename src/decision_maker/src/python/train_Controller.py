@@ -15,7 +15,7 @@ import os
 import csv
 import uuid
 import re
-from variables import gazebo_env,output_size
+from variables import gazebo_env,output_size,repeat_count,no_frontier_counter
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import rospy
 import tf
@@ -108,45 +108,39 @@ def format_info_gain_record(info_gain_record, size):
     return output_string
 
 
-def format_robot_post_orientation(pose):
-    pose = np.array2string(pose, separator=', ')[1:-1]
-    pose = pose.replace(' ', '')
-    pose = pose.replace(",,", ",")
-    pose = '[' + pose + ']'
-    return pose
-
-
-def format_best_centroid(best_centroid):
-    best_centroid = str(best_centroid)
+def format_list(string):
+    string = str(string)
     # Remove the first and last brackets from the string
-    best_centroid = best_centroid[1:-1]
+    string = string[1:-1]
 
     # Remove empty spaces from the front
-    best_centroid = best_centroid.lstrip()
+    string = string.lstrip()
 
-    best_centroid = best_centroid.rstrip()
+    string = string.rstrip()
 
-    best_centroid = best_centroid.replace(" ", ",")
+    string = string.replace(" ", ",")
 
-    best_centroid = re.sub(r',,', ',', best_centroid)
+    string = re.sub(r',,', ',', string)
 
-    best_centroid = '[' + best_centroid + ']'
+    string = '[' + string + ']'
 
-    return best_centroid
+    return string
+
+
 
 # Generate a unique number (UUID)
 unique_number = uuid.uuid4()
 shortened_number = str(unique_number)[:7]
 def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv'
-    folder_path = csv_folder_path + '/' + gazebo_env
-    file_name = folder_path + '/' + str(shortened_number) + '.csv'
+    folder_path = csv_folder_path + '/' + gazebo_env + '/'+ str(repeat_count)
+    file_name = folder_path  +'/'+ str(shortened_number) + '.csv'
 
-    robot_position = format_robot_post_orientation(robot_position)
-    robot_orientation = format_robot_post_orientation(robot_orientation)
+    robot_position = format_list(robot_position)
+    robot_orientation = format_list(robot_orientation)
     centroid_record = format_centroid_record(centroid_record, output_size)
     info_gain_record = format_info_gain_record(info_gain_record, output_size)
-    best_centroid = format_best_centroid(best_centroid)
+    best_centroid = format_list(best_centroid)
 
     if os.path.exists(folder_path):
         print("The folder exists.")
@@ -240,6 +234,13 @@ def statusCallBack(data):
         rospy.logwarn_throttle(1, rospy.get_name() +
                                ': ORB-SLAM status is UNKNOWN. Robot stopped.')
 
+counter = 0
+store_result =[]
+def log_warn_throttled(message):
+    global counter
+    counter += 1
+    rospy.logwarn_throttle(0.5, rospy.get_name ()+ message)
+    rospy.loginfo("Log warn counter: {}".format(counter))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Node~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -296,11 +297,11 @@ def node():
 
     # ORB-SLAM map
     map_ = Map()
-
-    # Get ROS time in seconds
+    
+    #temporal cond
     t_0 = rospy.get_time()
-    rospy.loginfo("Current time t_0: %f ", t_0)
 
+    
     ig_changer = 0
 
     rospy.loginfo(rospy.get_name() + ": Initialized.")
@@ -310,7 +311,7 @@ def node():
 
         # Check temporal stopping criterion
         t_f = rospy.get_time() - t_0  # Get ROS time in seconds
-        rospy.loginfo("Current time t_f: %f ", t_f)
+        # rospy.loginfo("Current time ROS: %f ", t_f)
 
         if t_f >= exploring_time:
             robot_.cancelGoal()
@@ -331,12 +332,21 @@ def node():
 
         if not is_lost_:  # ORB-SLAM OK
             centroids = deepcopy(frontiers_)
-
             n_centroids = len(centroids)
+            
+
             if n_centroids <= 0:
-                rospy.logwarn_throttle(
-                    0.5, rospy.get_name() + ": No frontiers.")
-                # ending_cond= rospy.logwarn_throttle(0.5, rospy.get_name() + ": No frontiers.")
+                # rospy.logwarn_throttle(
+                #     0.5, rospy.get_name() + ": No frontiers.")
+                log_warn_throttled("No frontiers.")
+
+                if counter >= no_frontier_counter:
+                    #get current ros time
+                    current_time = rospy.Time.now()
+                    store_result.append(current_time.to_sec())
+                    # print("store_result:", store_result)
+                    print("Completed ROS time:", store_result[0])
+                
                 if ig_changer < 10:
                     ig_changer += 1
                 client = dynamic_reconfigure.client.Client(
