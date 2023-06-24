@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 import random
 from collections import deque
+from replay_buffer import ReplayBuffer
 
 
 class DuelingDQN(nn.Module):
@@ -33,7 +34,6 @@ class DuelingDQN(nn.Module):
     def forward(self, x):
         """
         The value stream captures the value of being in a particular state, which represents the expected return or utility of that state. It helps the agent understand how good or promising a state is on its own, regardless of the specific action taken.
-        The advantage stream measures the advantage of each action compared to the average value of all actions in that state. By subtracting the mean advantage from the advantages of each action, the agent can assess the relative importance or benefit of choosing one action over another in a given state.
         """
         # Pass the input state through the feature layer
         features = self.feature_layer(x)
@@ -50,28 +50,9 @@ class DuelingDQN(nn.Module):
         return q_values
 
 
-class ReplayBuffer:
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.buffer = deque(maxlen=capacity)
-
-    def push(self, state, action, reward, next_state, done):
-        experience = (state, action, reward, next_state, done)
-        self.buffer.append(experience)
-
-    def sample(self, batch_size):
-        state_batch, action_batch, reward_batch, next_state_batch, done_batch = zip(
-            *random.sample(self.buffer, batch_size)
-        )
-        return state_batch, action_batch, reward_batch, next_state_batch, done_batch
-
-    def __len__(self):
-        return len(self.buffer)
-
-
 class DuelingDQNAgent:
-    def __init__(self, gazebo_env, gamma, learning_rate, tau, epsilon,
-                 save_interval, epochs, batch_size, penalty,robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
+    def __init__(self, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+                 save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         self.robot_post_arr = robot_post_arr[0]
         self.robot_orie_arr = robot_orie_arr[0]
         self.centr_arr = centr_arr[0]
@@ -86,8 +67,12 @@ class DuelingDQNAgent:
 
         self.gamma = gamma
         self.learning_rate = learning_rate
-        self.tau = tau
+       
+
         self.epsilon = epsilon
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
+
         self.save_interval = save_interval
         self.epochs = epochs
         self.batch_size = batch_size
@@ -130,62 +115,84 @@ class DuelingDQNAgent:
     def initialize_dueling_dqn(self):
         network_input, output_size, _ = self.prepare_input(
             self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr)
-        self.dqn = DuelingDQN(
+        self.dueling_dqn = DuelingDQN(
             network_input.shape[1], output_size).to(self.device)
-        self.target_dqn = DuelingDQN(
+        self.target_dueling_dqn = DuelingDQN(
             network_input.shape[1], output_size).to(self.device)
         self.criterion = nn.MSELoss()
-        self.optimizer = torch.optim.Adam(self.dqn.parameters())
+        self.optimizer = torch.optim.Adam(self.dueling_dqn.parameters())
         self.save_model()
 
     def update_target_network(self):
-        for target_param, param in zip(self.target_dqn.parameters(), self.dqn.parameters()):
-            target_param.data.copy_(
-                self.tau * param.data + (1 - self.tau) * target_param.data)
-
-        self.save_model()
+       self.target_dueling_dqn.load_state_dict(self.dueling_dqn.state_dict())
 
     def save_model(self):
-        torch.save(self.target_dqn.state_dict(), self.filepath)
+        torch.save(self.target_dueling_dqn.state_dict(), self.filepath)
 
     def load_model(self):
-        self.target_dqn.load_state_dict(torch.load(
+        self.dueling_dqn.load_state_dict(torch.load(
             self.filepath, map_location=self.device))
-        self.target_dqn.eval()
+        self.target_dueling_dqn.load_state_dict(torch.load(
+            self.filepath, map_location=self.device))
 
-    def select_action(self, state, output_size):
+    def select_action(self, state, output_size, sorted_centroid_record):
+        """Selects an action using the epsilon-greedy approach."""
         if random.random() < self.epsilon:
             action = random.randint(0, output_size - 1)
         else:
             with torch.no_grad():
-                q_values = self.dqn(state)
-                selected_q_values = q_values[:, :5]
-                action = selected_q_values.argmax(dim=1).item()
+                q_values = self.dueling_dqn(state).clone()
+
+                # Get the indices of the centroids which are [0.0, 0.0]
+                indices = (sorted_centroid_record == torch.tensor(
+                    [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
+
+                # Apply penalty to q_values at those indices
+                q_values[0, indices] = -self.penalty
+
+                action = q_values.argmax(dim=1).item()
+
+        # Apply epsilon decay if epsilon is more than its minimum value
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
         return action
 
     def calculate_reward(self):
+        """Calculates the reward for a given centroid."""
         predicted_centroid, _ = self.get_max_info_gain_centroid()
+
         target_centroid = torch.tensor(
             self.best_centr_arr, dtype=torch.float32, device=self.device)
+
+        # Check if the predicted centroid matches the best centroid
         match = torch.all(torch.eq(predicted_centroid, target_centroid))
+
+        # Increase the reward for the chosen predicted centroid if it matches the target centroid
         if match:
             reward = 1
         else:
             reward = 0
+
+        # Apply penalty to the reward if the predicted centroid is [0.0, 0.0]
+        zero_centroid = torch.tensor([0.0, 0.0], device=self.device)
+        if torch.all(torch.eq(predicted_centroid, zero_centroid)):
+            reward -= self.penalty
+
         return reward, predicted_centroid
 
     def train(self):
-        zero_centroid = torch.tensor([0.0, 0.0], device=self.device)
         self.dones = torch.zeros((1,), device=self.device)
 
         self.replay_buffer = ReplayBuffer(10000)
         for epoch in range(self.epochs):
             for i in range(len(self.robot_post_arr2)-1):
                 self.load_model()
-                network_input, output_size, _ = self.prepare_input(
+                network_input, output_size, sorted_centroid_record = self.prepare_input(
                     self.robot_post_arr2[i], self.robot_orie_arr2[i], self.centr_arr2[i], self.info_arr2[i])
 
-                actions = self.select_action(network_input, output_size)
+                actions = self.select_action(
+                    network_input, output_size, sorted_centroid_record)
 
                 rewards, predicted_centroid = self.calculate_reward()
 
@@ -210,8 +217,8 @@ class DuelingDQNAgent:
                     dones = torch.tensor(
                         dones, dtype=torch.float32).unsqueeze(-1).to(self.device)
 
-                    q_values = self.dqn(states)
-                    next_q_values = self.target_dqn(next_states)
+                    q_values = self.dueling_dqn(states)
+                    next_q_values = self.target_dueling_dqn(next_states)
                     max_next_q_values = next_q_values.max(
                         dim=1, keepdim=True)[0]
 
@@ -222,29 +229,28 @@ class DuelingDQNAgent:
                     targets = targets.expand_as(q_values)
                     loss = self.criterion(q_values, targets)
 
-                    if torch.all(torch.eq(predicted_centroid, zero_centroid)):
-                        loss += self.penalty
-
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
-                    self.update_epsilon(epoch)
+                    self.update_epsilon()
 
             if self.epochs % self.save_interval == 0:
                 self.update_target_network()
                 self.save_model()
 
             print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
+        self.save_model()
 
-    def update_epsilon(self, epoch):
-        self.epsilon = max(0.01, 0.1 - (0.09 / self.epochs) * epoch)
+    def update_epsilon(self):
+        """Decays epsilon over time."""
+        self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
 
     def get_max_info_gain_centroid(self):
-        self.load_model()
+        self.target_dueling_dqn.eval()
         network_input, _, sorted_centroid_record = self.prepare_input(
             self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr)
         with torch.no_grad():
-            output = self.target_dqn(network_input.to(self.device))
+            output = self.target_dueling_dqn(network_input.to(self.device))
         max_info_gain_centroid_idx = np.argmax(output.cpu().numpy())
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
             0]
@@ -252,15 +258,13 @@ class DuelingDQNAgent:
         return max_info_gain_centroid, max_info_gain_centroid_idx
 
     def predict_centroid(self, robot_position, robot_orientation, centroid_records, info_gain_records):
-        self.load_model()
+        self.target_dueling_dqn.eval()
         network_input, _, sorted_centroid_record = self.prepare_input(
             robot_position, robot_orientation, centroid_records, info_gain_records)
         with torch.no_grad():
-            output = self.target_dqn(network_input.to(self.device))
+            output = self.target_dueling_dqn(network_input.to(self.device))
         max_info_gain_centroid_idx = np.argmax(output.cpu().numpy())
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
             0]
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
         return max_info_gain_centroid, max_info_gain_centroid_idx
-
-

@@ -30,7 +30,7 @@ import numpy as np
 import heapq
 import tf
 import rospy
-from variables import output_size, algo, gazebo_env, gamma, learning_rate, tau, epsilon, save_interval, epochs, batch_size, penalty
+from variables import epsilon_min, epsilon_decay, output_size, algo, gazebo_env, gamma, learning_rate, tau, epsilon, save_interval, epochs, batch_size, penalty
 from agent import *
 import csv
 from train_script import gazebo_env
@@ -204,7 +204,7 @@ def test_model(robot_position, robot_orientation,
     #       centroid_record, info_gain_record, best_centroid)
 
     #  create model
-    model = Agent(algo, gazebo_env, gamma, learning_rate, tau, epsilon,
+    model = Agent(algo, gazebo_env, gamma, learning_rate, tau, epsilon, epsilon_min, epsilon_decay,
                   save_interval, epochs, batch_size, penalty,
                   robot_position, robot_orientation,
                   centroid_record, info_gain_record, best_centroid)

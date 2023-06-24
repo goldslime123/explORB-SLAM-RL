@@ -1,16 +1,9 @@
-import pandas as pd
-from dqn import DQNAgent
-from ddqn import DDQNAgent
-from dueling_dqn import DuelingDQNAgent
-from dueling_ddqn import DuelingDDQNAgent
 from csv_handler import *
 from agent import *
 
 import sys
 sys.path.append('/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/')
 from variables import *
-
-
 
 
 def train_model():
@@ -21,7 +14,7 @@ def train_model():
     # print(robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids)
 
     # create model
-    model = Agent(algo, gazebo_env, gamma, learning_rate, tau, epsilon, epsilon_min,epsilon_decay,
+    model = Agent(algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min,epsilon_decay,
                   save_interval, epochs, batch_size, penalty,
                   robot_positions, robot_orientations,
                   centroid_records, info_gain_records, best_centroids)
@@ -52,7 +45,7 @@ def test_model():
         output_path)
 
     # create model
-    model = Agent(algo, gazebo_env, gamma, learning_rate, tau, epsilon, epsilon_min,epsilon_decay,
+    model = Agent(algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min,epsilon_decay,
                   save_interval, epochs, batch_size, penalty,
                   robot_positions, robot_orientations,
                   centroid_records, info_gain_records, best_centroids)

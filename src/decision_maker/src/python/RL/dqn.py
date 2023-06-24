@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 import random
 from collections import deque
-
+from replay_buffer import ReplayBuffer
 
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -21,27 +21,9 @@ class DQN(nn.Module):
         return x
 
 
-class ReplayBuffer:
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.buffer = deque(maxlen=capacity)
-
-    def push(self, state, action, reward, next_state, done):
-        experience = (state, action, reward, next_state, done)
-        self.buffer.append(experience)
-
-    def sample(self, batch_size):
-        state_batch, action_batch, reward_batch, next_state_batch, done_batch = zip(
-            *random.sample(self.buffer, batch_size)
-        )
-        return state_batch, action_batch, reward_batch, next_state_batch, done_batch
-
-    def __len__(self):
-        return len(self.buffer)
-
 
 class DQNAgent:
-    def __init__(self, gazebo_env, gamma, learning_rate, tau, epsilon, epsilon_min,epsilon_decay,
+    def __init__(self, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # paremeters
         self.robot_post_arr = robot_post_arr[0]
@@ -58,7 +40,6 @@ class DQNAgent:
 
         self.gamma = gamma
         self.learning_rate = learning_rate
-        self.tau = tau
 
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -76,7 +57,7 @@ class DQNAgent:
         self.dones = None
 
         # Initialize the replay buffer
-        self.replay_buffer = deque(maxlen=1000)
+        self.replay_buffer = ReplayBuffer(10000)  
 
         # Initialize the DQN network
         self.initialize_dqn()
@@ -110,7 +91,6 @@ class DQNAgent:
 
         network_input = network_input.reshape(1, input_size)
 
-
         # Determine the output size based on the shape of the sorted centroid record
         output_size = sorted_centroid_record.shape[0]
 
@@ -121,20 +101,18 @@ class DQNAgent:
         network_input, output_size, _ = self.prepare_input(
             self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
         )
+
         self.dqn = DQN(network_input.shape[1], output_size).to(self.device)
         self.target_dqn = DQN(
             network_input.shape[1], output_size).to(self.device)
+
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.dqn.parameters())
         self.save_model()
 
     def update_target_network(self):
         """Updates the target DQN parameters using the DQN parameters."""
-        for target_param, param in zip(self.target_dqn.parameters(), self.dqn.parameters()):
-            target_param.data.copy_(
-                self.tau * param.data + (1 - self.tau) * target_param.data)
-
-        self.save_model()
+        self.target_dqn.load_state_dict(self.dqn.state_dict())
 
     def save_model(self):
         """Saves the target DQN model."""
@@ -142,9 +120,10 @@ class DQNAgent:
 
     def load_model(self):
         """Loads the saved model into the target DQN."""
+        self.dqn.load_state_dict(torch.load(
+            self.filepath, map_location=self.device))
         self.target_dqn.load_state_dict(torch.load(
             self.filepath, map_location=self.device))
-        self.target_dqn.eval()
 
     def select_action(self, state, output_size, sorted_centroid_record):
         """Selects an action using the epsilon-greedy approach."""
@@ -153,12 +132,13 @@ class DQNAgent:
         else:
             with torch.no_grad():
                 q_values = self.dqn(state).clone()
-                
+
                 # Get the indices of the centroids which are [0.0, 0.0]
-                indices = (sorted_centroid_record == torch.tensor([0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
-                
+                indices = (sorted_centroid_record == torch.tensor(
+                    [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
+
                 # Apply penalty to q_values at those indices
-                q_values[0, indices] = -1e10
+                q_values[0, indices] = -self.penalty
 
                 action = q_values.argmax(dim=1).item()
 
@@ -184,22 +164,26 @@ class DQNAgent:
         else:
             reward = 0
 
+        # Apply penalty to the reward if the predicted centroid is [0.0, 0.0]
+        zero_centroid = torch.tensor([0.0, 0.0], device=self.device)
+        if torch.all(torch.eq(predicted_centroid, zero_centroid)):
+            reward -= self.penalty
+
         return reward, predicted_centroid
 
     def train(self):
-        zero_centroid = torch.tensor([0.0, 0.0], device=self.device)
         self.dones = torch.zeros((1,), device=self.device)
+       
 
-        self.replay_buffer = ReplayBuffer(10000)  # Initialize replay buffer
         for epoch in range(self.epochs):
             for i in range(len(self.robot_post_arr2)-1):
                 self.load_model()
                 network_input, output_size, sorted_centroid_record = self.prepare_input(
                     self.robot_post_arr2[i], self.robot_orie_arr2[i], self.centr_arr2[i], self.info_arr2[i]
                 )
-
                 # select action
-                actions = self.select_action(network_input, output_size,sorted_centroid_record)
+                actions = self.select_action(
+                    network_input, output_size, sorted_centroid_record)
 
                 rewards, predicted_centroid = self.calculate_reward()
 
@@ -247,31 +231,29 @@ class DQNAgent:
                     targets = targets.expand_as(q_values)
                     loss = self.criterion(q_values, targets)
 
-                    # Add penalty if the predicted centroid matches [0, 0]
-                    if torch.all(torch.eq(predicted_centroid, zero_centroid)):
-                        loss += self.penalty
-
+                    # Clear previously calculated gradients
                     self.optimizer.zero_grad()
+                    # Compute gradients by backpropagation
                     loss.backward()
+                    # Update parameters using the computed gradients
                     self.optimizer.step()
-                    self.update_epsilon(epoch)
+                    self.update_epsilon()
 
             if self.epochs % self.save_interval == 0:
                 self.update_target_network()
                 self.save_model()
 
-            print(f'q_values shape: {q_values.shape}')
-            print(f'rewards shape: {rewards.shape}')
-            print(f'max_next_q_values shape: {max_next_q_values.shape}')
-
             print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
 
-    def update_epsilon(self, epoch):
+        # Save the final model
+        self.save_model()
+
+    def update_epsilon(self):
         """Decays epsilon over time."""
-        self.epsilon = max(0.01, 0.1 - (0.09 / self.epochs) * epoch)
+        self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
 
     def get_max_info_gain_centroid(self):
-        self.load_model()
+        self.target_dqn.eval()
         """Finds the centroid with the highest information gain."""
         network_input, _, sorted_centroid_record = self.prepare_input(
             self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
@@ -285,16 +267,11 @@ class DQNAgent:
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
 
+    # for testing
     def predict_centroid(self, robot_position, robot_orientation, centroid_records, info_gain_records):
         """Predicts the best centroid based on the given robot position and orientation using the target network."""
-        self.load_model()
-        
-        # print(type(robot_position))
-        centr_arr = [[1, 2], [3, 4], [0, 0], [0, 0], [0, 0]]
-        info_arr = [[10], [20], [0], [0], [0]]
+        self.target_dqn.eval()
 
-        # print(robot_position, robot_orientation,
-        #       centroid_records, info_gain_records)
         """Finds the centroid with the highest information gain."""
         network_input, _, sorted_centroid_record = self.prepare_input(
             robot_position, robot_orientation, centroid_records, info_gain_records
@@ -307,5 +284,3 @@ class DQNAgent:
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
-
-
