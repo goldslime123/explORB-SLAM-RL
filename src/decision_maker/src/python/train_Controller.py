@@ -110,18 +110,21 @@ def format_info_gain_record(info_gain_record, size):
 
 def format_list(string):
     string = str(string)
+
     # Remove the first and last brackets from the string
     string = string[1:-1]
 
-    # Remove empty spaces from the front
+    # Remove leading and trailing empty spaces
     string = string.lstrip()
-
     string = string.rstrip()
 
+    # Replace spaces with commas
     string = string.replace(" ", ",")
 
-    string = re.sub(r',,', ',', string)
+    # Remove consecutive commas
+    string = re.sub(r',+', ',', string)
 
+    # Add brackets back to the string
     string = '[' + string + ']'
 
     return string
@@ -132,7 +135,7 @@ def format_list(string):
 unique_number = uuid.uuid4()
 shortened_number = str(unique_number)[:7]
 def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
-    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/csv'
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv'
     folder_path = csv_folder_path + '/' + gazebo_env + '/'+ str(repeat_count)
     file_name = folder_path  +'/'+ str(shortened_number) + '.csv'
 

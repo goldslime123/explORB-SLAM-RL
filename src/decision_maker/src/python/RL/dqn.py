@@ -41,7 +41,7 @@ class ReplayBuffer:
 
 
 class DQNAgent:
-    def __init__(self, gazebo_env, gamma, learning_rate, tau, epsilon,
+    def __init__(self, gazebo_env, gamma, learning_rate, tau, epsilon, epsilon_min,epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # paremeters
         self.robot_post_arr = robot_post_arr[0]
@@ -59,7 +59,11 @@ class DQNAgent:
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.tau = tau
+
         self.epsilon = epsilon
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
+
         self.save_interval = save_interval
         self.epochs = epochs
         self.batch_size = batch_size
@@ -142,18 +146,26 @@ class DQNAgent:
             self.filepath, map_location=self.device))
         self.target_dqn.eval()
 
-    def select_action(self, state, output_size):
+    def select_action(self, state, output_size, sorted_centroid_record):
         """Selects an action using the epsilon-greedy approach."""
         if random.random() < self.epsilon:
             action = random.randint(0, output_size - 1)
         else:
             with torch.no_grad():
-                q_values = self.dqn(state)
-                # Select the desired subset of Q-values (e.g., the first two values)
-                # Adjust the range as needed
-                selected_q_values = q_values[:, :5]
+                q_values = self.dqn(state).clone()
+                
+                # Get the indices of the centroids which are [0.0, 0.0]
+                indices = (sorted_centroid_record == torch.tensor([0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
+                
+                # Apply penalty to q_values at those indices
+                q_values[0, indices] = -1e10
 
-                action = selected_q_values.argmax(dim=1).item()
+                action = q_values.argmax(dim=1).item()
+
+        # Apply epsilon decay if epsilon is more than its minimum value
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
         return action
 
     def calculate_reward(self):
@@ -182,12 +194,12 @@ class DQNAgent:
         for epoch in range(self.epochs):
             for i in range(len(self.robot_post_arr2)-1):
                 self.load_model()
-                network_input, output_size, _ = self.prepare_input(
+                network_input, output_size, sorted_centroid_record = self.prepare_input(
                     self.robot_post_arr2[i], self.robot_orie_arr2[i], self.centr_arr2[i], self.info_arr2[i]
                 )
 
                 # select action
-                actions = self.select_action(network_input, output_size)
+                actions = self.select_action(network_input, output_size,sorted_centroid_record)
 
                 rewards, predicted_centroid = self.calculate_reward()
 
@@ -247,6 +259,10 @@ class DQNAgent:
             if self.epochs % self.save_interval == 0:
                 self.update_target_network()
                 self.save_model()
+
+            print(f'q_values shape: {q_values.shape}')
+            print(f'rewards shape: {rewards.shape}')
+            print(f'max_next_q_values shape: {max_next_q_values.shape}')
 
             print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
 

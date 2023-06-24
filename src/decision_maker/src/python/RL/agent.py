@@ -11,7 +11,7 @@ from csv_handler import *
 
 
 class Agent:
-    def __init__(self, algo, gazebo_env, gamma, learning_rate, tau, epsilon,
+    def __init__(self, algo, gazebo_env, gamma, learning_rate, tau, epsilon,epsilon_min,epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # parameters
         self.robot_post_arr = robot_post_arr
@@ -25,7 +25,11 @@ class Agent:
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.tau = tau
+
         self.epsilon = epsilon
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
+
         self.save_interval = save_interval
         self.epochs = epochs
         self.batch_size = batch_size
@@ -37,7 +41,8 @@ class Agent:
         # Initialize the specific model based on the chosen algorithm
         if algo == 'dqn':
             self.model = DQNAgent(
-                self.gazebo_env, self.gamma, self.learning_rate, self.tau, self.epsilon,
+                self.gazebo_env, self.gamma, self.learning_rate, self.tau, 
+                self.epsilon, self.epsilon_min, self.epsilon_decay,
                 self.save_interval, self.epochs, self.batch_size, self.penalty,
                 self.robot_post_arr, self.robot_orie_arr,
                 self.centr_arr, self.info_arr, self.best_centr_arr)
