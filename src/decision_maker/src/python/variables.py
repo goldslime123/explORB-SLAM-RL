@@ -1,5 +1,5 @@
 # train script
-repeat_count = 4
+repeat_count = 40
 gazebo_env = 'aws_house'
 decision_maker = 'train_autonomous_agent'
 
@@ -12,7 +12,7 @@ aws -house
 459
 """
 if gazebo_env == "aws_house":
-    explore_time = 500
+    explore_time = 520
 
     # output network size
     output_size = 10

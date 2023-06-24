@@ -241,29 +241,67 @@ import torch
 
 # rospy.spin()
 
-import rospy
-from nav_msgs.msg import OccupancyGrid
-import numpy as np
-import cv2
+# import rospy
+# from nav_msgs.msg import OccupancyGrid
+# import numpy as np
+# import cv2
 
-def occupancy_grid_callback(msg):
-    # Extract occupancy grid data
-    width = msg.info.width
-    height = msg.info.height
-    data = np.array(msg.data).reshape((height, width))
+# def occupancy_grid_callback(msg):
+#     # Extract occupancy grid data
+#     width = msg.info.width
+#     height = msg.info.height
+#     data = np.array(msg.data).reshape((height, width))
 
-    # Convert occupancy grid to grayscale image
-    image = (data * 255 / 100).astype(np.uint8)
+#     # Convert occupancy grid to grayscale image
+#     image = (data * 255 / 100).astype(np.uint8)
 
-    # Save the image
-    save_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/rviz/test.png'
-    cv2.imwrite(save_path, image)
-    print("Image saved to", save_path)
+#     # Save the image
+#     save_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/rviz/test.png'
+#     cv2.imwrite(save_path, image)
+#     print("Image saved to", save_path)
 
-rospy.init_node('occupancy_grid_saver')
-occupancy_grid_topic = '/gridmapper/rectified_map' 
-rospy.Subscriber(occupancy_grid_topic, OccupancyGrid, occupancy_grid_callback)
+# rospy.init_node('occupancy_grid_saver')
+# occupancy_grid_topic = '/gridmapper/rectified_map' 
+# rospy.Subscriber(occupancy_grid_topic, OccupancyGrid, occupancy_grid_callback)
 
-rospy.spin()
+# rospy.spin()
 
+
+import os
+import csv
+
+def store_time(get_time, gazebo_env, repeat_count):
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv_time'
+    folder_path = os.path.join(csv_folder_path, gazebo_env)
+    file_name = os.path.join(folder_path, gazebo_env + '_' +
+                             'train_result' + '_' + str(repeat_count) + '.csv')
+
+    if os.path.exists(folder_path):
+        if os.path.exists(file_name):
+            with open(file_name, 'r', newline='') as file:
+                reader = csv.reader(file, delimiter=' ')
+                rows = list(reader)
+            exists = any(str(get_time) in row for row in rows)
+
+            if not exists:
+                with open(file_name, 'a', newline='') as file:
+                    writer = csv.writer(file, delimiter=' ')
+                    writer.writerow([get_time])
+        else:
+            with open(file_name, 'w', newline='') as file:
+                writer = csv.writer(file, delimiter=' ')
+                writer.writerow([get_time])
+    else:
+        os.makedirs(folder_path, exist_ok=True)
+        with open(file_name, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter=' ')
+            writer.writerow(['Results'])
+            writer.writerow([get_time])
+
+# Example usage:
+get_time = 40.2  # Replace with your actual value
+gazebo_env = "my_env"  # Replace with your desired folder name
+repeat_count = 1  # Replace with your desired repeat count
+
+store_time(get_time, gazebo_env, repeat_count)
 

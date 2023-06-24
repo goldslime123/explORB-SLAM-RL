@@ -15,7 +15,7 @@ import os
 import csv
 import uuid
 import re
-from variables import gazebo_env,output_size,repeat_count,no_frontier_counter
+from variables import gazebo_env, output_size, repeat_count, no_frontier_counter
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import rospy
 import tf
@@ -53,6 +53,14 @@ is_lost_ = False
 is_relocalizing_ = False
 goal_cancel_pub_ = rospy.Publisher(
     '/robot_1/move_base/cancel', GoalID, queue_size=10)
+
+# GLOBAL VARIABLES
+# Generate a unique number (UUID)
+unique_number = uuid.uuid4()
+shortened_number = str(unique_number)[:7]
+counter = 0
+store_result = []
+
 
 def does_row_exist(file_name, row_data):
     with open(file_name, 'r', newline='') as file:
@@ -95,10 +103,10 @@ def format_info_gain_record(info_gain_record, size):
     output_list = []
     for element in elements:
         element = element.strip()  # Remove leading and trailing whitespace
-        
+
         if element != "[0]":  # Add brackets if element is not [0]
             element = f"[{element.strip('[]')}]"
-        
+
         output_list.append(element)
 
     # Join the elements back into a string
@@ -110,34 +118,20 @@ def format_info_gain_record(info_gain_record, size):
 
 def format_list(string):
     string = str(string)
-
-    # Remove the first and last brackets from the string
     string = string[1:-1]
-
-    # Remove leading and trailing empty spaces
     string = string.lstrip()
     string = string.rstrip()
-
-    # Replace spaces with commas
     string = string.replace(" ", ",")
-
-    # Remove consecutive commas
     string = re.sub(r',+', ',', string)
-
-    # Add brackets back to the string
     string = '[' + string + ']'
 
     return string
 
 
-
-# Generate a unique number (UUID)
-unique_number = uuid.uuid4()
-shortened_number = str(unique_number)[:7]
 def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv'
-    folder_path = csv_folder_path + '/' + gazebo_env + '/'+ str(repeat_count)
-    file_name = folder_path  +'/'+ str(shortened_number) + '.csv'
+    folder_path = csv_folder_path + '/' + gazebo_env + '/' + str(repeat_count)
+    file_name = folder_path + '/' + str(shortened_number) + '.csv'
 
     robot_position = format_list(robot_position)
     robot_orientation = format_list(robot_orientation)
@@ -164,6 +158,42 @@ def store_csv(robot_position, robot_orientation, centroid_record, info_gain_reco
         print("The folder does not exist.")
         os.makedirs(folder_path, exist_ok=True)
         print(f"Folder '{folder_path}' created successfully.")
+
+
+def log_warn_throttled(message):
+    global counter
+    counter += 1
+    rospy.logwarn_throttle(0.5, rospy.get_name() + message)
+    rospy.loginfo("Log warn counter: {}".format(counter))
+
+
+def store_result_time(get_time):
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv_time'
+    folder_path = os.path.join(csv_folder_path, gazebo_env)
+    file_name = os.path.join(folder_path, gazebo_env + '_' +
+                             'train_result' + '_' + str(repeat_count) + '.csv')
+
+    if os.path.exists(folder_path):
+        if os.path.exists(file_name):
+            with open(file_name, 'r', newline='') as file:
+                reader = csv.reader(file, delimiter=' ')
+                rows = list(reader)
+            exists = any(str(get_time) in row for row in rows)
+
+            if not exists:
+                with open(file_name, 'a', newline='') as file:
+                    writer = csv.writer(file, delimiter=' ')
+                    writer.writerow([get_time])
+        else:
+            with open(file_name, 'w', newline='') as file:
+                writer = csv.writer(file, delimiter=' ')
+                writer.writerow([get_time])
+    else:
+        os.makedirs(folder_path, exist_ok=True)
+        with open(file_name, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter=' ')
+            writer.writerow(['Results'])
+            writer.writerow([get_time])
 
 
 def mapPointsCallBack(data):
@@ -237,13 +267,6 @@ def statusCallBack(data):
         rospy.logwarn_throttle(1, rospy.get_name() +
                                ': ORB-SLAM status is UNKNOWN. Robot stopped.')
 
-counter = 0
-store_result =[]
-def log_warn_throttled(message):
-    global counter
-    counter += 1
-    rospy.logwarn_throttle(0.5, rospy.get_name ()+ message)
-    rospy.loginfo("Log warn counter: {}".format(counter))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Node~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -300,11 +323,10 @@ def node():
 
     # ORB-SLAM map
     map_ = Map()
-    
-    #temporal cond
+
+    # temporal cond
     t_0 = rospy.get_time()
 
-    
     ig_changer = 0
 
     rospy.loginfo(rospy.get_name() + ": Initialized.")
@@ -336,7 +358,6 @@ def node():
         if not is_lost_:  # ORB-SLAM OK
             centroids = deepcopy(frontiers_)
             n_centroids = len(centroids)
-            
 
             if n_centroids <= 0:
                 # rospy.logwarn_throttle(
@@ -344,12 +365,12 @@ def node():
                 log_warn_throttled("No frontiers.")
 
                 if counter >= no_frontier_counter:
-                    #get current ros time
+                    # get current ros time
                     current_time = rospy.Time.now()
                     store_result.append(current_time.to_sec())
-                    # print("store_result:", store_result)
                     print("Completed ROS time:", store_result[0])
-                
+                    store_result_time(store_result[0])
+
                 if ig_changer < 10:
                     ig_changer += 1
                 client = dynamic_reconfigure.client.Client(
@@ -471,7 +492,7 @@ def node():
 
                     rospy.loginfo(
                         rospy.get_name() + ": Info gain/Centroid: \n" + format(info_centroid_record))
-                    
+
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to centroid " +
                                   format(centroid_record[winner_id]))
 
