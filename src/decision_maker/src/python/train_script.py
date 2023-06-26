@@ -4,7 +4,8 @@ import subprocess
 import time
 import rospy
 import signal
-from variables import *
+import os
+from variables import repeat_count, explore_time, gazebo_env
 
 
 class ActiveSLAM:
@@ -20,13 +21,16 @@ class ActiveSLAM:
 
     def roslaunch_gazebo(self, env):
         # Launch Gazebo environment
-        subprocess.Popen(['roslaunch', 'robot_description', str(env+".launch")])
+        subprocess.Popen(
+            ['roslaunch', 'robot_description', str(env+".launch")])
 
     def roslaunch_gazebo_decision_maker(self):
         # Launch Gazebo environment and decision-maker component
-        subprocess.Popen(['roslaunch', 'robot_description', str(self.gazebo_env+".launch")])
+        subprocess.Popen(['roslaunch', 'robot_description',
+                         str(self.gazebo_env+".launch")])
         time.sleep(5)
-        subprocess.Popen(['roslaunch', 'decision_maker', str(self.decision_maker+".launch")])
+        subprocess.Popen(['roslaunch', 'decision_maker',
+                         str(self.decision_maker+".launch")])
 
     def kill_ros_process(self):
         # Kill ROS processes
@@ -48,8 +52,10 @@ class ActiveSLAM:
         subprocess.run(['rosnode', 'kill', '/G_publisher'])
         subprocess.run(['rosnode', 'kill', '/gridmapper'])
         subprocess.run(['rosnode', 'kill', '/octomapper'])
-        subprocess.run(['rosnode', 'kill', '/frontier_detectors/global_detector'])
-        subprocess.run(['rosnode', 'kill', '/frontier_detectors/opencv_detector'])
+        subprocess.run(
+            ['rosnode', 'kill', '/frontier_detectors/global_detector'])
+        subprocess.run(
+            ['rosnode', 'kill', '/frontier_detectors/opencv_detector'])
         subprocess.run(['rosnode', 'kill', '/frontier_detectors/filter'])
 
     def kill_all_process(self):
@@ -63,6 +69,68 @@ class ActiveSLAM:
         print("Ctrl+C detected! Performing cleanup...")
         self.kill_all_process()
         self.ctrl_c_pressed = True
+    
+    
+
+    def check_new_csv_files(self):
+        folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data' + \
+            '/' + gazebo_env + '/' + str(repeat_count)
+        # Get the list of files in the folder
+        files = os.listdir(folder_path)
+
+        # Filter the list to only include CSV files
+        csv_files = [file for file in files if file.endswith('.csv')]
+
+        # Sort the list of CSV files by modification time
+        sorted_files = sorted(csv_files, key=lambda x: os.path.getmtime(
+            os.path.join(folder_path, x)))
+
+        # Get the name of the newest CSV file
+        newest_csv_file = sorted_files[-1] if sorted_files else None
+
+        return newest_csv_file
+
+    def save_image(self):
+        csv_name = self.check_new_csv_files()
+        csv_name = str(csv_name)[:7]
+        # Define the window title of the application
+        window_title = 'config.rviz - RViz'
+        name_not_completed = str(csv_name) + '_not_completed' + '.png'
+        file_path_not_completed = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/train_data/' + \
+            gazebo_env + '/'+str(repeat_count) + '/not_completed'
+        save_path_not_completed = os.path.join(
+            file_path_not_completed, name_not_completed)
+
+        # Create the directory if it doesn't exist
+        os.makedirs(file_path_not_completed, exist_ok=True)
+
+        # Get the window ID of the application window
+        result = subprocess.run(
+            ['wmctrl', '-l'], capture_output=True, text=True)
+        window_id = None
+        for line in result.stdout.splitlines():
+            if window_title in line:
+                window_id = line.split()[0]
+                break
+
+        # Capture the screenshot using the import command of the xwd tool
+        subprocess.run(['xwd', '-id', window_id, '-out', 'screenshot.xwd'])
+
+        # Convert the captured screenshot to a PNG image using the convert command of the ImageMagick tool
+        subprocess.run(['convert', 'screenshot.xwd', name_not_completed])
+
+        name_completed = str(csv_name) + '_completed' + '.png'
+        file_path_completed = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/train_data/' + \
+            gazebo_env + '/' + str(repeat_count) + '/completed'
+        save_path_completed = os.path.join(file_path_completed, name_completed)
+        # print(save_path_completed)
+
+        # Check if the file  exists
+        if not os.path.exists(save_path_completed):
+            # Move the captured screenshot to the desired location
+            subprocess.run(['mv', name_not_completed, save_path_not_completed])
+        else:
+            print("Save path already exists. Skipping saving the screenshot.")
 
     def run(self):
         # Main execution method
@@ -79,15 +147,20 @@ class ActiveSLAM:
                 self.roslaunch_gazebo_decision_maker()
                 time.sleep(self.explore_time)
 
+                self.save_image()
+
                 self.kill_all_process()
                 print(f"Script execution {x} completed.")
 
             self.ctrl_c_pressed = True
             print(f"Script execution stopped.")
 
+
 def initialize_active_slam():
     # Initialize the ActiveSLAM object
-    active_slam = ActiveSLAM(repeat_count, explore_time, decision_maker, gazebo_env)
+    decision_maker = 'train_autonomous_agent'
+    active_slam = ActiveSLAM(repeat_count, explore_time,
+                             decision_maker, gazebo_env)
     return active_slam
 
 

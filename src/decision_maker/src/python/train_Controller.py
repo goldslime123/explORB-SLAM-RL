@@ -15,6 +15,8 @@ import os
 import csv
 import uuid
 import re
+import subprocess
+
 from variables import gazebo_env, output_size, repeat_count, no_frontier_counter
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import rospy
@@ -55,12 +57,11 @@ goal_cancel_pub_ = rospy.Publisher(
     '/robot_1/move_base/cancel', GoalID, queue_size=10)
 
 # GLOBAL VARIABLES
-# Generate a unique number (UUID)
-unique_number = uuid.uuid4()
-shortened_number = str(unique_number)[:7]
 counter = 0
 store_result = []
 
+unique_number = uuid.uuid4()
+shortened_number = str(unique_number)[:7]
 
 def does_row_exist(file_name, row_data):
     with open(file_name, 'r', newline='') as file:
@@ -129,7 +130,7 @@ def format_list(string):
 
 
 def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
-    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv'
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data'
     folder_path = csv_folder_path + '/' + gazebo_env + '/' + str(repeat_count)
     file_name = folder_path + '/' + str(shortened_number) + '.csv'
 
@@ -167,8 +168,8 @@ def log_warn_throttled(message):
     rospy.loginfo("Log warn counter: {}".format(counter))
 
 
-def store_result_time(get_time):
-    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv_time'
+def store_result_time(completed_time):
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/completed_time'
     folder_path = os.path.join(csv_folder_path, gazebo_env)
     file_name = os.path.join(folder_path, gazebo_env + '_' +
                              'train_result' + '_' + str(repeat_count) + '.csv')
@@ -178,22 +179,50 @@ def store_result_time(get_time):
             with open(file_name, 'r', newline='') as file:
                 reader = csv.reader(file, delimiter=' ')
                 rows = list(reader)
-            exists = any(str(get_time) in row for row in rows)
+            exists = any(str(completed_time) in row for row in rows)
 
             if not exists:
                 with open(file_name, 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=' ')
-                    writer.writerow([get_time])
+                    writer.writerow([str(shortened_number), completed_time])
         else:
             with open(file_name, 'w', newline='') as file:
                 writer = csv.writer(file, delimiter=' ')
-                writer.writerow([get_time])
+                writer.writerow([str(shortened_number), completed_time])
     else:
         os.makedirs(folder_path, exist_ok=True)
         with open(file_name, 'w', newline='') as file:
             writer = csv.writer(file, delimiter=' ')
-            writer.writerow(['Results'])
-            writer.writerow([get_time])
+            writer.writerow(['csv file name','time'])
+            writer.writerow([str(shortened_number), completed_time])
+
+
+def save_image():
+    # Define the window title of the application
+    window_title = 'config.rviz - RViz'
+    name = str(shortened_number)+'_completed' + '.png'
+    file_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/train_data/' + gazebo_env + '/'+str(repeat_count)+'/completed'
+    save_path = os.path.join(file_path, name)
+
+    # Create the directory if it doesn't exist
+    os.makedirs(file_path, exist_ok=True)
+
+    # Get the window ID of the application window
+    result = subprocess.run(['wmctrl', '-l'], capture_output=True, text=True)
+    window_id = None
+    for line in result.stdout.splitlines():
+        if window_title in line:
+            window_id = line.split()[0]
+            break
+
+    # Capture the screenshot using the import command of the xwd tool
+    subprocess.run(['xwd', '-id', window_id, '-out', 'screenshot_temp.xwd'])
+
+    # Convert the captured screenshot to a PNG image using the convert command of the ImageMagick tool
+    subprocess.run(['convert', 'screenshot_temp.xwd', save_path])
+
+    # Move the captured screenshot to the desired location
+    subprocess.run(['mv', name, save_path])
 
 
 def mapPointsCallBack(data):
@@ -359,6 +388,8 @@ def node():
             centroids = deepcopy(frontiers_)
             n_centroids = len(centroids)
 
+            is_image_saved = False
+
             if n_centroids <= 0:
                 # rospy.logwarn_throttle(
                 #     0.5, rospy.get_name() + ": No frontiers.")
@@ -367,9 +398,16 @@ def node():
                 if counter >= no_frontier_counter:
                     # get current ros time
                     current_time = rospy.Time.now()
-                    store_result.append(current_time.to_sec())
-                    print("Completed ROS time:", store_result[0])
-                    store_result_time(store_result[0])
+                    
+                    # save completed image
+                    if not is_image_saved:
+                        store_result.append(current_time.to_sec())
+                        print("Completed ROS time:", store_result[0])
+                        
+                        # save in csv
+                        store_result_time(store_result[0])
+                        save_image()
+                        is_image_saved = True
 
                 if ig_changer < 10:
                     ig_changer += 1
@@ -504,6 +542,7 @@ def node():
                     store_csv(robot_position, robot_orientation,
                               centroid_record, info_gain_record, centroid_record[winner_id])
 
+                    # save_image()
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
                     robot_.sendGoal(centroid_record[winner_id], True)

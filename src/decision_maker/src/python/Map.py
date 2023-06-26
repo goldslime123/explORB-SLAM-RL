@@ -452,8 +452,8 @@ class Map:
                 if v > th_max:
                     reloc_KF_IDs[k] = 1
                 else:
-                    # reloc_KF_IDs[k] = v / th_max
-                    reloc_KF_IDs[k] = (v-th_min) / (th_max-th_min)
+                    reloc_KF_IDs[k] = v / th_max
+                    # reloc_KF_IDs[k] = (v-th_min) / (th_max-th_min)
                 # prob = np.random.rand()
                 # if prob <= v / th_max:
                 #     reloc_KF_IDs[k] = v

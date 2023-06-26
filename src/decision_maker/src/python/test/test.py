@@ -267,41 +267,63 @@ import torch
 # rospy.spin()
 
 
-import os
-import csv
+# import os
+# import csv
 
-def store_time(get_time, gazebo_env, repeat_count):
-    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv_time'
-    folder_path = os.path.join(csv_folder_path, gazebo_env)
-    file_name = os.path.join(folder_path, gazebo_env + '_' +
-                             'train_result' + '_' + str(repeat_count) + '.csv')
+# def store_time(get_time, gazebo_env, repeat_count):
+#     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv_time'
+#     folder_path = os.path.join(csv_folder_path, gazebo_env)
+#     file_name = os.path.join(folder_path, gazebo_env + '_' +
+#                              'train_result' + '_' + str(repeat_count) + '.csv')
 
-    if os.path.exists(folder_path):
-        if os.path.exists(file_name):
-            with open(file_name, 'r', newline='') as file:
-                reader = csv.reader(file, delimiter=' ')
-                rows = list(reader)
-            exists = any(str(get_time) in row for row in rows)
+#     if os.path.exists(folder_path):
+#         if os.path.exists(file_name):
+#             with open(file_name, 'r', newline='') as file:
+#                 reader = csv.reader(file, delimiter=' ')
+#                 rows = list(reader)
+#             exists = any(str(get_time) in row for row in rows)
 
-            if not exists:
-                with open(file_name, 'a', newline='') as file:
-                    writer = csv.writer(file, delimiter=' ')
-                    writer.writerow([get_time])
-        else:
-            with open(file_name, 'w', newline='') as file:
-                writer = csv.writer(file, delimiter=' ')
-                writer.writerow([get_time])
-    else:
-        os.makedirs(folder_path, exist_ok=True)
-        with open(file_name, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter=' ')
-            writer.writerow(['Results'])
-            writer.writerow([get_time])
+#             if not exists:
+#                 with open(file_name, 'a', newline='') as file:
+#                     writer = csv.writer(file, delimiter=' ')
+#                     writer.writerow([get_time])
+#         else:
+#             with open(file_name, 'w', newline='') as file:
+#                 writer = csv.writer(file, delimiter=' ')
+#                 writer.writerow([get_time])
+#     else:
+#         os.makedirs(folder_path, exist_ok=True)
+#         with open(file_name, 'w', newline='') as file:
+#             writer = csv.writer(file, delimiter=' ')
+#             writer.writerow(['Results'])
+#             writer.writerow([get_time])
 
-# Example usage:
-get_time = 40.2  # Replace with your actual value
-gazebo_env = "my_env"  # Replace with your desired folder name
-repeat_count = 1  # Replace with your desired repeat count
+# # Example usage:
+# get_time = 40.2  # Replace with your actual value
+# gazebo_env = "my_env"  # Replace with your desired folder name
+# repeat_count = 1  # Replace with your desired repeat count
 
-store_time(get_time, gazebo_env, repeat_count)
+# store_time(get_time, gazebo_env, repeat_count)
 
+import subprocess
+
+def save_image():
+    # Define the window title of the application
+    window_title = 'config.rviz - RViz'
+
+    # Get the window ID of the application window
+    result = subprocess.run(['wmctrl', '-l'], capture_output=True, text=True)
+    window_id = None
+    for line in result.stdout.splitlines():
+        if window_title in line:
+            window_id = line.split()[0]
+            break
+
+    # Capture the screenshot using the import command of the xwd tool
+    subprocess.run(['xwd', '-id', window_id, '-out', 'screenshot.xwd'])
+
+    # Convert the captured screenshot to a PNG image using the convert command of the ImageMagick tool
+    subprocess.run(['convert', 'screenshot.xwd', 'screenshot.png'])
+
+    # Move the captured screenshot to the desired location
+    subprocess.run(['mv', 'screenshot.png', '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/rviz/aws_house/screenshot.png'])

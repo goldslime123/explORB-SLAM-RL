@@ -25,6 +25,10 @@ def read_csv(directory):
 
 
 def combine_csv(folder_path, output_file):
+    # Create the output folder
+    output_folder = os.path.dirname(output_file)
+    os.makedirs(output_folder, exist_ok=True)
+
     merged_data = []
     file_list = os.listdir(folder_path)
     num_files = len(file_list)
@@ -42,7 +46,7 @@ def combine_csv(folder_path, output_file):
             # Append the data to the merged_data
             merged_data.extend(data)
 
-    # Write the merged data to a new CSV file
+    # Write the merged data to the output CSV file
     with open(output_file, 'w', newline='') as merged_file:
         csv_writer = csv.writer(merged_file)
         csv_writer.writerows(merged_data)
