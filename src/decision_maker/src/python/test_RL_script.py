@@ -5,7 +5,8 @@ import time
 import rospy
 import signal
 import os
-from variables import repeat_count, explore_time, gazebo_env
+import csv
+from variables import repeat_count, explore_time, gazebo_env, algo
 
 
 class ActiveSLAM:
@@ -69,11 +70,9 @@ class ActiveSLAM:
         print("Ctrl+C detected! Performing cleanup...")
         self.kill_all_process()
         self.ctrl_c_pressed = True
-    
-    
 
     def check_new_csv_files(self):
-        folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data' + \
+        folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/temp' + \
             '/' + gazebo_env + '/' + str(repeat_count)
         # Get the list of files in the folder
         files = os.listdir(folder_path)
@@ -90,16 +89,22 @@ class ActiveSLAM:
 
         return newest_csv_file
 
+
+
     def save_image(self):
         csv_name = self.check_new_csv_files()
         csv_name = str(csv_name)[:7]
+
+        # print(csv_name)
         # Define the window title of the application
         window_title = 'config.rviz - RViz'
         name_not_completed = str(csv_name) + '_not_completed' + '.png'
-        file_path_not_completed = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/' + gazebo_env + '/train_data' \
-             + '/' + str(repeat_count) + '/not_completed'
+        file_path_not_completed = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/' + gazebo_env + '/' + \
+            algo + '/'+str(repeat_count) + '/not_completed'
         save_path_not_completed = os.path.join(
             file_path_not_completed, name_not_completed)
+        
+        # print(save_path_not_completed)
 
         # Create the directory if it doesn't exist
         os.makedirs(file_path_not_completed, exist_ok=True)
@@ -120,8 +125,8 @@ class ActiveSLAM:
         subprocess.run(['convert', 'screenshot.xwd', name_not_completed])
 
         name_completed = str(csv_name) + '_completed' + '.png'
-        file_path_completed = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/' + gazebo_env + '/train_data' \
-             + '/' + str(repeat_count) + '/completed'
+        file_path_completed = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/'+ gazebo_env  + '/' +\
+            algo + '/' + str(repeat_count) + '/completed'
         save_path_completed = os.path.join(file_path_completed, name_completed)
         # print(save_path_completed)
 
@@ -158,7 +163,7 @@ class ActiveSLAM:
 
 def initialize_active_slam():
     # Initialize the ActiveSLAM object
-    decision_maker = 'train_autonomous_agent'
+    decision_maker = 'test_RL_autonomous_agent'
     active_slam = ActiveSLAM(repeat_count, explore_time,
                              decision_maker, gazebo_env)
     return active_slam

@@ -11,14 +11,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Include modules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # libraries
-import os
-import csv
-import uuid
-import re
-import subprocess
-
-from variables import gazebo_env, output_size, repeat_count, no_frontier_counter
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import rospy
 import tf
 import heapq
@@ -29,19 +21,38 @@ from copy import deepcopy
 from scipy.spatial.transform import Rotation
 from frontier_detector.msg import PointArray
 from nav_msgs.msg import OccupancyGrid
-"""
-from sensor_msgs.msg import PointCloud2
-"""
 from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import Pose
 from visualization_msgs.msg import MarkerArray
 from actionlib_msgs.msg import GoalID
 from orb_slam2_ros.msg import ORBState
-
 from Functions import waitEnterKey, quaternion2euler, cellInformation_NUMBA, cellInformation, yawBtw2Points
 from Robot import Robot
 from Map import Map
 from WeightedPoseGraph import WeightedPoseGraph
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+import subprocess
+import re
+import uuid
+import csv
+import os
+import sys
+sys.path.append(
+    '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL')
+from agent import *
+from variables import gazebo_env, output_size, repeat_count, no_frontier_counter, epsilon_min, epsilon_decay, output_size, algo, gazebo_env, gamma, learning_rate, epsilon, save_interval, epochs, batch_size, penalty
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+"""
+from sensor_msgs.msg import PointCloud2
+"""
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Callbacks~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,40 +71,9 @@ goal_cancel_pub_ = rospy.Publisher(
 counter = 0
 store_result = []
 
+unique_number = uuid.uuid4()
+shortened_number = str(unique_number)[:7]
 
-sequential_number = 1
-
-def generate_uuid():
-    global sequential_number
-    sequential_part = str(sequential_number).zfill(2)
-    random_part = str(uuid.uuid4())[2:6]
-    new_uuid = f"{sequential_part}-{random_part}"
-
-    # Define the CSV folder path
-    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data'
-    folder_path = os.path.join(csv_folder_path, gazebo_env, str(repeat_count))
-
-    # Check if the folder exists
-    if os.path.exists(folder_path):
-        # Get the list of files in the folder
-        files = os.listdir(folder_path)
-
-        # Filter the list to only include CSV files
-        csv_files = [file for file in files if file.endswith('.csv')]
-
-        # Check if the sequential number exists in any of the CSV file names
-        sequential_exists = any(sequential_part in file_name for file_name in csv_files)
-
-        if sequential_exists:
-            sequential_number += 1
-            return generate_uuid()
-
-    sequential_number += 1
-    return new_uuid
-
-
-
-shortened_number = generate_uuid()
 
 def does_row_exist(file_name, row_data):
     with open(file_name, 'r', newline='') as file:
@@ -105,6 +85,7 @@ def does_row_exist(file_name, row_data):
 
 
 def format_centroid_record(centroid_record, size):
+    # print(centroid_record)
     centroid_empty_list = [[0, 0] for _ in range(size)]
     for i, sublist in enumerate(centroid_record):
         centroid_empty_list[i] = sublist
@@ -124,7 +105,7 @@ def format_centroid_record(centroid_record, size):
 
 
 def format_info_gain_record(info_gain_record, size):
-    info_empty_list = [[0] for _ in range(size)]
+    info_empty_list = [0 for _ in range(size)]
     for i, sublist in enumerate(info_gain_record):
         info_empty_list[i] = sublist
 
@@ -146,51 +127,116 @@ def format_info_gain_record(info_gain_record, size):
     output_string = ", ".join(output_list)
     output_string = '[' + output_string + ']'
 
-    return output_string
+    return info_empty_list
+
+
+# def format_robot_post_orientation(pose):
+#     # print(pose)
+#     pose = np.array2string(pose, separator=', ')[1:-1]
+#     pose = pose.replace(' ', '')
+#     pose = pose.replace(",,", ",")
+#     pose = '[' + pose + ']'
+#     return pose
 
 
 def format_list(string):
     string = str(string)
+    # Remove the first and last brackets from the string
     string = string[1:-1]
+
+    # Remove empty spaces from the front
     string = string.lstrip()
+
     string = string.rstrip()
+
     string = string.replace(" ", ",")
-    string = re.sub(r',+', ',', string)
+
+    string = re.sub(r',,', ',', string)
+
     string = '[' + string + ']'
 
     return string
 
 
-def store_csv(robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid):
-    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data'
-    folder_path = csv_folder_path + '/' + gazebo_env + '/' + str(repeat_count)
-    file_name = folder_path + '/' + str(shortened_number) + '.csv'
+def format_list_of_list(string):
+    print(string)
+
+    # Remove spaces after the first bracket
+    string = string.replace("[ ", "[")
+
+    # Remove spaces before the last bracket
+    string = string.replace(" ]", "]")
+
+    # Remove consecutive commas
+    string = string.replace(",,", ",")
+
+    string_values = string.strip("[]").split(",")
+    values = [float(value.strip()) for value in string_values]
+
+    my_list = [values]
+
+    return my_list
+
+
+def format_tuple(str_list):
+    str_list = str(str_list)
+
+    # Evaluate the string as a Python object
+    values = ast.literal_eval(str_list)
+
+    # Convert the list of lists to a list containing a single tuple
+    my_list = [tuple(values)]
+
+    return my_list
+
+
+def format_tuple_list_of_list(my_list, size):
+    num_brackets = size
+
+    new_list = [tuple([item] if idx < num_brackets else item for idx,
+                      item in enumerate(sublist)) for sublist in my_list]
+
+    return new_list
+
+
+def test_model(robot_position, robot_orientation,
+               centroid_record, info_gain_record, best_centroid):
 
     robot_position = format_list(robot_position)
+    robot_position = format_list_of_list(robot_position)
+
     robot_orientation = format_list(robot_orientation)
+    robot_orientation = format_list_of_list(robot_orientation)
+
     centroid_record = format_centroid_record(centroid_record, output_size)
+    centroid_record = format_tuple(centroid_record)
+
     info_gain_record = format_info_gain_record(info_gain_record, output_size)
+    info_gain_record = format_tuple(info_gain_record)
+    info_gain_record = format_tuple_list_of_list(
+        info_gain_record, output_size)
+
     best_centroid = format_list(best_centroid)
+    best_centroid = format_list_of_list(best_centroid)
 
-    if os.path.exists(folder_path):
-        print("The folder exists.")
-        if os.path.exists(file_name):
-            print(f"The file '{file_name}' exists.")
-            with open(file_name, 'a', newline='') as file:
-                writer = csv.writer(file, delimiter=';')
-                writer.writerow(
-                    [robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid])
+    # print(robot_position, robot_orientation,
+    #       centroid_record, info_gain_record, best_centroid)
 
-        else:
-            print(f"The file '{file_name}' does not exist. Creating file.")
-            with open(file_name, 'w', newline='') as file:
-                writer = csv.writer(file, delimiter=';')
-                writer.writerow(
-                    [robot_position, robot_orientation, centroid_record, info_gain_record, best_centroid])
-    else:
-        print("The folder does not exist.")
-        os.makedirs(folder_path, exist_ok=True)
-        print(f"Folder '{folder_path}' created successfully.")
+    #  create model
+    model = Agent(algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+                  save_interval, epochs, batch_size, penalty,
+                  robot_position, robot_orientation,
+                  centroid_record, info_gain_record, best_centroid)
+
+    # return tensor
+    predicted_centroid, predicted_centroid_index = model.predict_centroid(robot_position[0], robot_orientation[0],
+                                                                          centroid_record[0], info_gain_record[0])
+
+    # tensor to list
+    predicted_centroid = predicted_centroid.tolist()
+    predicted_centroid_index = predicted_centroid_index.tolist()
+
+    return predicted_centroid, predicted_centroid_index
 
 
 def log_warn_throttled(message):
@@ -200,11 +246,35 @@ def log_warn_throttled(message):
     rospy.loginfo("Log warn counter: {}".format(counter))
 
 
+def store_csv():
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/temp'
+    folder_path = csv_folder_path + '/' + gazebo_env + '/' + str(repeat_count)
+    file_name = folder_path + '/' + str(shortened_number) + '.csv'
+
+    if os.path.exists(folder_path):
+        print("The folder exists.")
+        if os.path.exists(file_name):
+            print(f"The file '{file_name}' exists.")
+            with open(file_name, 'a', newline='') as file:
+                writer = csv.writer(file, delimiter=';')
+                writer.writerow([])
+
+        else:
+            print(f"The file '{file_name}' does not exist. Creating file.")
+            with open(file_name, 'w', newline='') as file:
+                writer = csv.writer(file, delimiter=';')
+                writer.writerow([])
+    else:
+        print("The folder does not exist.")
+        os.makedirs(folder_path, exist_ok=True)
+        print(f"Folder '{folder_path}' created successfully.")
+
+
 def store_result_time(completed_time):
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/completed_time'
     folder_path = os.path.join(csv_folder_path, gazebo_env)
-    file_name = os.path.join(
-        folder_path, 'train_result' + '_' + str(repeat_count) + '.csv')
+    file_name = os.path.join(folder_path, algo + '_' + 'result' + '_' +
+                             str(repeat_count) + '.csv')
 
     if os.path.exists(folder_path):
         if os.path.exists(file_name):
@@ -233,8 +303,8 @@ def save_image():
     # Define the window title of the application
     window_title = 'config.rviz - RViz'
     name = str(shortened_number)+'_completed' + '.png'
-    file_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/' + gazebo_env + '/train_data' \
-         + '/'+str(repeat_count)+'/completed'
+    file_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/' + \
+        gazebo_env + '/' + algo + '/'+str(repeat_count)+'/completed'
     save_path = os.path.join(file_path, name)
 
     # Create the directory if it doesn't exist
@@ -346,7 +416,7 @@ def node():
     rate_hz = rospy.get_param('~rate', 100)
     delay_after_assignment = rospy.get_param('~delay_after_assignment', 0.1)
     show_debug_path = rospy.get_param('~show_debug_path', False)
-    exploring_time = rospy.get_param('~max_exploring_time', 9000)
+    exploring_time = rospy.get_param('~max_exploring_time', 9000)  # 150 mins
     use_gpu = rospy.get_param('~enable_gpu_comp', True)
     camera_type = rospy.get_param('~camera_type', 'rgbd')
 
@@ -386,8 +456,9 @@ def node():
     # ORB-SLAM map
     map_ = Map()
 
-    # temporal cond
+    # Get ROS time in seconds
     t_0 = rospy.get_time()
+    rospy.loginfo("Current time t_0: %f ", t_0)
 
     ig_changer = 0
 
@@ -398,7 +469,7 @@ def node():
 
         # Check temporal stopping criterion
         t_f = rospy.get_time() - t_0  # Get ROS time in seconds
-        # rospy.loginfo("Current time ROS: %f ", t_f)
+        rospy.loginfo("Current time ROS: %f ", t_f)
 
         if t_f >= exploring_time:
             robot_.cancelGoal()
@@ -572,12 +643,14 @@ def node():
                     robot_position = robot_.getPose()[0]
                     robot_orientation = robot_.getPose()[1]
 
-                    # store csv
-                    store_csv(robot_position, robot_orientation,
-                              centroid_record, info_gain_record, centroid_record[winner_id])
-
-
+                    store_csv()
                     # save_image()
+
+                    predicted_centroid, predicted_centroid_index = test_model(
+                        robot_position, robot_orientation, centroid_record, info_gain_record, centroid_record[winner_id])
+
+                    print("Predicted Centroid: " + str(predicted_centroid))
+
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
                     robot_.sendGoal(centroid_record[winner_id], True)

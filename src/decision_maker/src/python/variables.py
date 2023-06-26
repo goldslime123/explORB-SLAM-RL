@@ -7,19 +7,16 @@ explore_time - in seconds
 output_size - based on number of detected for different env
 no_frontier_counter - counter for "No Frontier", as it indicates end of exploration
 """
-repeat_count = 25
+repeat_count = 5
 gazebo_env = 'aws_house'
-decision_maker = 'train_autonomous_agent'
-
-
 
 # diff env paremeters
 if gazebo_env == "aws_house":
-    # explore_time = 600
-    explore_time = 15*60
+    explore_time = 850
+    # explore_time = 15*60
 
     output_size = 10
-    no_frontier_counter = 8
+    no_frontier_counter = 10
 
 
 """
