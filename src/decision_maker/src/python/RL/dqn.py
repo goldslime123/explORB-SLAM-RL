@@ -4,6 +4,8 @@ import numpy as np
 import random
 from collections import deque
 from replay_buffer import ReplayBuffer
+from variables import repeat_count
+import os
 
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -51,7 +53,17 @@ class DQNAgent:
         self.penalty = penalty
 
         self.gazebo_env = gazebo_env
-        self.filepath = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dqn_{self.epochs}.pth"
+
+        self.folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}'
+        # Create directory if it does not exist
+        if not os.path.exists(self.folder_path):
+            os.makedirs(self.folder_path)
+        
+        
+        self.filepath = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dqn_{repeat_count}.pth"
+        
+
+
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.dones = None

@@ -7,18 +7,6 @@ explore_time - in seconds
 output_size - based on number of detected for different env
 no_frontier_counter - counter for "No Frontier", as it indicates end of exploration
 """
-repeat_count = 5
-gazebo_env = 'aws_house'
-
-# diff env paremeters
-if gazebo_env == "aws_house":
-    explore_time = 850
-    # explore_time = 15*60
-
-    output_size = 10
-    no_frontier_counter = 10
-
-
 """
 RL Paremeters
 algo - dqn, ddqn, dueling_dqn, dueling_ddqn
@@ -32,18 +20,27 @@ save_interval - update target network
 batch_size - model update one experience at a time (will always be 1)
 penalty - agent discourage from selecting centroid with [0,0]
 """
-algo = 'dqn'
-gamma = 0.95
-learning_rate = 0.0001
+gazebo_env = 'aws_house'
 
-epsilon = 1
-epsilon_min = 0.1
-epsilon_decay = 5e-7
+# diff env paremeters
+if gazebo_env == "aws_house":
+    repeat_count = 15
+    explore_time = 850
+    # explore_time = 15*60
+    output_size = 10
+    no_frontier_counter = 10
+    algo = 'ddqn'
+    gamma = 0.95
+    learning_rate = 0.0001
 
-epochs = 100
-save_interval = 10
-batch_size = 1
-penalty = 0.5
+    epsilon = 1
+    epsilon_min = 0.1
+    epsilon_decay = 5e-7
+
+    epochs = 100
+    save_interval = 10
+    batch_size = 1
+    penalty = 0.5
 
 
 # records
