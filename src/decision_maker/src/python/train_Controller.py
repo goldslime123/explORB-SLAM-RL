@@ -81,16 +81,31 @@ def generate_uuid():
         # Filter the list to only include CSV files
         csv_files = [file for file in files if file.endswith('.csv')]
 
-        # Check if the sequential number exists in any of the CSV file names
-        sequential_exists = any(sequential_part in file_name for file_name in csv_files)
+        # Extract the sequential numbers from CSV file names
+        existing_numbers = set()
+        for file_name in csv_files:
+            number_part = file_name.split('-')[0]
+            if number_part.isdigit():
+                existing_numbers.add(int(number_part))
 
-        if sequential_exists:
+        # Find the first available sequential number
+        while sequential_number in existing_numbers:
             sequential_number += 1
-            return generate_uuid()
+
+    if sequential_number == 10:
+        sequential_number = 10
+
+    elif sequential_number == 20:
+        sequential_number = 20
+
+    new_uuid = f"{str(sequential_number).zfill(2)}-{random_part}"
+
+    # Update the existing_numbers set after generating the new UUID
+    existing_numbers.add(sequential_number)
 
     sequential_number += 1
-    return new_uuid
 
+    return new_uuid
 
 
 shortened_number = generate_uuid()

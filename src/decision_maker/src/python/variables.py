@@ -24,7 +24,7 @@ gazebo_env = 'aws_house'
 
 # diff env paremeters
 if gazebo_env == "aws_house":
-    repeat_count = 15
+    repeat_count = 20
     explore_time = 850
     # explore_time = 15*60
     output_size = 10
