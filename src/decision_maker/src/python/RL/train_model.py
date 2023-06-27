@@ -3,7 +3,7 @@ sys.path.append(
     '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/')
 from csv_handler import *
 from agent import *
-
+import torch
 # RL Parementers
 gazebo_env = 'aws_house'
 algo = 'dqn'
@@ -65,16 +65,20 @@ def test_model():
                   robot_positions, robot_orientations,
                   centroid_records, info_gain_records, best_centroids)
 
-    if algo == 'dqn':
-        model.initialize_dqn()
-    elif algo == 'ddqn':
-        model.initialize_ddqn()
-    elif algo == 'dueling_dqn':
-        model.initialize_dueling_dqn()
-    elif algo == 'dueling_ddqn':
-        model.initialize_dueling_ddqn()
+    # if algo == 'dqn':
+    #     model.initialize_dqn()
+    # elif algo == 'ddqn':
+    #     model.initialize_ddqn()
+    # elif algo == 'dueling_dqn':
+    #     model.initialize_dueling_dqn()
+    # elif algo == 'dueling_ddqn':
+    #     model.initialize_dueling_ddqn()
+
+  
+
 
     model.load_model()
+
 
     # show result for each row
     for i in range(len(robot_positions)):
@@ -89,6 +93,6 @@ if __name__ == "__main__":
     
     
     train_model()
-    # test_model()
+    test_model()
 
     
