@@ -3,10 +3,10 @@ sys.path.append(
     '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/')
 from csv_handler import *
 from agent import *
-import torch
+
 # RL Parementers
 gazebo_env = 'aws_house'
-algo = 'dqn'
+algo = 'dueling_ddqn'
 repeat_count = 5
 
 gamma = 0.90
@@ -55,18 +55,6 @@ def test_model():
                   save_interval, epochs, batch_size, penalty,
                   robot_positions, robot_orientations,
                   centroid_records, info_gain_records, best_centroids)
-
-    # if algo == 'dqn':
-    #     model.initialize_dqn()
-    # elif algo == 'ddqn':
-    #     model.initialize_ddqn()
-    # elif algo == 'dueling_dqn':
-    #     model.initialize_dueling_dqn()
-    # elif algo == 'dueling_ddqn':
-    #     model.initialize_dueling_ddqn()
-
-  
-
 
     model.load_model()
 

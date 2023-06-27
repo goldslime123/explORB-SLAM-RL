@@ -275,14 +275,7 @@ def test_model(robot_position, robot_orientation,
                     robot_position, robot_orientation,
                     centroid_record, info_gain_record, best_centroid)
 
-        if algo == 'dqn':
-            model.initialize_dqn()
-        elif algo == 'ddqn':
-            model.initialize_ddqn()
-        elif algo == 'dueling_dqn':
-            model.initialize_dueling_dqn()
-        elif algo == 'dueling_ddqn':
-            model.initialize_dueling_ddqn()
+        model.load_model()
 
 
         # return tensor

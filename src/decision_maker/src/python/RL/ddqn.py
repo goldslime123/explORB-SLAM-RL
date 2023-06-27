@@ -135,7 +135,14 @@ class DDQNAgent:
             network_input.shape[1], output_size).to(self.device)
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.ddqn.parameters())
-        self.save_model()
+        
+        # Check if a model already exists
+        if os.path.isfile(self.filepath):
+            # If a model does exist, load it
+            self.load_model()
+        else:
+            # If no model exists, save the newly created one
+            self.save_model()
 
     def update_target_network(self):
         """Updates the target DDQN parameters using the DDQN parameters."""
