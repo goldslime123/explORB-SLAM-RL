@@ -88,8 +88,6 @@ class Agent:
         """Loads the saved model into the target DQN."""
         self.model.load_model()
 
-    
-
 
     def train(self):
         self.model.train()  # Call the train method of the specific model
