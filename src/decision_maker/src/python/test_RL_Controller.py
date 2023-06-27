@@ -273,6 +273,16 @@ def test_model(robot_position, robot_orientation,
                   save_interval, epochs, batch_size, penalty,
                   robot_position, robot_orientation,
                   centroid_record, info_gain_record, best_centroid)
+        
+        if algo == 'dqn':
+            model.initialize_dqn()
+        elif algo == 'ddqn':
+            model.initialize_ddqn()
+        elif algo == 'dueling_dqn':
+            model.initialize_dueling_dqn()
+        elif algo == 'dueling_ddqn':
+            model.initialize_dueling_ddqn()
+
 
         # return tensor
         predicted_centroid, predicted_centroid_index = model.predict_centroid(robot_position[0], robot_orientation[0],

@@ -6,7 +6,7 @@ from agent import *
 
 # RL Parementers
 gazebo_env = 'aws_house'
-algo = 'dueling_ddqn'
+algo = 'dqn'
 repeat_count = 5
 
 gamma = 0.90
