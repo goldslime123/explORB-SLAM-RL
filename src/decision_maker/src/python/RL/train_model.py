@@ -38,7 +38,7 @@ def train_model():
     elif algo == 'dueling_ddqn':
         model.initialize_dueling_ddqn()
 
-    # # train model
+    # train model
     model.train()
 
 
@@ -73,3 +73,5 @@ def test_model():
 if __name__ == "__main__":
     train_model()
     test_model()
+
+    

@@ -52,7 +52,7 @@ class DuelingDQN(nn.Module):
 
 
 class DuelingDQNAgent:
-    def __init__(self, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+    def __init__(self, model_path,gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         self.robot_post_arr = robot_post_arr[0]
         self.robot_orie_arr = robot_orie_arr[0]
@@ -85,7 +85,7 @@ class DuelingDQNAgent:
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
 
-        self.filepath = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dueling_dqn_{repeat_count}.pth"
+        self.filepath = model_path
 
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")

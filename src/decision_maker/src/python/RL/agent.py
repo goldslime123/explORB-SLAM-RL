@@ -11,7 +11,7 @@ from csv_handler import *
 
 
 class Agent:
-    def __init__(self, model_path, algo, gazebo_env, gamma, learning_rate, epsilon,epsilon_min,epsilon_decay,
+    def __init__(self, model_path, algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # parameters
         self.robot_post_arr = robot_post_arr
@@ -24,7 +24,6 @@ class Agent:
         self.gazebo_env = gazebo_env
         self.gamma = gamma
         self.learning_rate = learning_rate
-        
 
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -42,16 +41,16 @@ class Agent:
 
         # Initialize the specific model based on the chosen algorithm
         if algo == 'dqn':
-            self.model = DQNAgent( 
-                self.model_path,self.gazebo_env, self.gamma, self.learning_rate, 
+            self.model = DQNAgent(
+                self.model_path, self.gazebo_env, self.gamma, self.learning_rate,
                 self.epsilon, self.epsilon_min, self.epsilon_decay,
                 self.save_interval, self.epochs, self.batch_size, self.penalty,
                 self.robot_post_arr, self.robot_orie_arr,
                 self.centr_arr, self.info_arr, self.best_centr_arr)
 
         elif algo == 'ddqn':
-            self.model = DDQNAgent( 
-                self.gazebo_env, self.gamma, self.learning_rate, 
+            self.model = DDQNAgent(
+                self.model_path, self.gazebo_env, self.gamma, self.learning_rate,
                 self.epsilon, self.epsilon_min, self.epsilon_decay,
                 self.save_interval, self.epochs, self.batch_size, self.penalty,
                 self.robot_post_arr, self.robot_orie_arr,
@@ -59,7 +58,7 @@ class Agent:
 
         elif algo == 'dueling_dqn':
             self.model = DuelingDQNAgent(
-                self.gazebo_env, self.gamma, self.learning_rate, 
+                self.model_path, self.gazebo_env, self.gamma, self.learning_rate,
                 self.epsilon, self.epsilon_min, self.epsilon_decay,
                 self.save_interval, self.epochs, self.batch_size, self.penalty,
                 self.robot_post_arr, self.robot_orie_arr,
@@ -67,7 +66,7 @@ class Agent:
 
         elif algo == 'dueling_ddqn':
             self.model = DuelingDDQNAgent(
-                self.gazebo_env, self.gamma, self.learning_rate, 
+                self.model_path, self.gazebo_env, self.gamma, self.learning_rate,
                 self.epsilon, self.epsilon_min, self.epsilon_decay,
                 self.save_interval, self.epochs, self.batch_size, self.penalty,
                 self.robot_post_arr, self.robot_orie_arr,
@@ -115,7 +114,7 @@ class Agent:
 #     batch_size = 1
 #     penalty = 0.5
 
-#     robot_position = [[0.11, 2.5]] 
+#     robot_position = [[0.11, 2.5]]
 #     robot_orientation = [[1.0, 0.00222544, 0.92653255, -0.37618656]]
 #     centroid_records = [([4.20577174,-1.40001973],[0.58587992,-0.60072875],[0,0],[0,0],[0,0],[0,0])]
 #     info_gain_records=[([8.421770797635304],[148.53895792332335],[0],[0],[0],[0])]
@@ -130,8 +129,7 @@ class Agent:
 #                   save_interval, epochs, batch_size, penalty,
 #                   robot_position, robot_orientation,
 #                   centroid_records, info_gain_records, best_centroid)
-    
+
 #     predicted_centroid,_ = model.predict_centroid(robot_position[0], robot_orientation[0],
 #                 centroid_records[0], info_gain_records[0])
 #     print(predicted_centroid)
-   

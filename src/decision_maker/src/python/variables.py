@@ -24,13 +24,12 @@ gazebo_env = 'aws_house'
 
 # diff env paremeters
 if gazebo_env == "aws_house":
-    repeat_count = 1
-    explore_time = 850
-    # explore_time = 15*60
-    
+    repeat_count = 10
+    explore_time = 600
     output_size = 10
     no_frontier_counter = 10
 
+    # RL Parementers
     algo = 'dqn'
     gamma = 0.95
     learning_rate = 0.0001
@@ -42,14 +41,5 @@ if gazebo_env == "aws_house":
     epochs = 10
     save_interval = 2
     batch_size = 1
-    penalty = 0.5
+    penalty = 0.8
 
-
-# records
-"""
-aws -house 
-400 150 
-517
-422
-459
-"""

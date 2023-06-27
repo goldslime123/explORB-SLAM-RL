@@ -52,3 +52,21 @@ def combine_csv(folder_path, output_file):
         csv_writer.writerows(merged_data)
 
     print("CSV files combined successfully.")
+
+
+def calculate_average_from_csv(file_path):
+    print(file_path)
+    with open(file_path, 'r') as csv_file:
+        reader = csv.reader(csv_file, delimiter=' ')
+        next(reader)  # Skip the header row if present
+        column_data = []
+        for row in reader:
+            if len(row) >= 2:
+                column_data.append(float(row[1]))
+
+    if column_data:
+        average = sum(column_data) / len(column_data)
+        return average
+    else:
+        return None
+
