@@ -192,21 +192,31 @@ def format_list(string):
 
 
 def format_list_of_list(string):
-    # print(string)
+    print(string)
 
-    # Remove spaces after the first bracket
-    string = string.replace("[ ", "[")
+    # Remove unnecessary spaces
+    string = string.replace("[ ", "[").replace(" ]", "]").replace(",,", ",")
 
-    # Remove spaces before the last bracket
-    string = string.replace(" ]", "]")
+    # Strip outer brackets and split on '], ['
+    string_values = string.strip("[]").split("], [")
 
-    # Remove consecutive commas
-    string = string.replace(",,", ",")
+    my_list = []
 
-    string_values = string.strip("[]").split(",")
-    values = [float(value.strip()) for value in string_values]
+    # Iterate through each list in string_values
+    for sublist in string_values:
+        # Split each sublist string into substrings using comma as separator
+        values = sublist.split(",")
 
-    my_list = [values]
+        # Convert each substring to float and append to my_list
+        float_values = []
+        for value in values:
+            value = value.strip()
+            if value:  # only attempt to convert if string is not empty
+                try:
+                    float_values.append(float(value))
+                except ValueError:
+                    print(f"Could not convert '{value}' to float.")
+        my_list.append(float_values)
 
     return my_list
 
