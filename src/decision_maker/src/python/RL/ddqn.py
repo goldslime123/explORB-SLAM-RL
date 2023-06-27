@@ -1,25 +1,27 @@
 import torch
 import torch.nn as nn
-import numpy as np
 import random
 import os
 from collections import deque
 from replay_buffer import ReplayBuffer
-from variables import repeat_count
 
 class DDQN(nn.Module):
     def __init__(self, input_size, output_size):
         super(DDQN, self).__init__()
-        self.fc1 = nn.Linear(input_size, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 32)
-        self.fc4 = nn.Linear(32, output_size)
+        self.fc1 = nn.Linear(input_size, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc3 = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, 32)
+        self.fc5 = nn.Linear(32, 16)
+        self.fc6 = nn.Linear(16, output_size)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
         x = torch.relu(self.fc3(x))
-        x = self.fc4(x)
+        x = torch.relu(self.fc4(x))
+        x = torch.relu(self.fc5(x))
+        x = self.fc6(x)
         return x
 
 
@@ -72,7 +74,7 @@ class DDQNAgent:
 
         self.gazebo_env = gazebo_env
 
-        self.folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}'
+        self.folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/ddqn'
         # Create directory if it does not exist
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
@@ -287,13 +289,22 @@ class DDQNAgent:
         )
         with torch.no_grad():
             output = self.target_ddqn(network_input.to(self.device))
-        max_info_gain_centroid_idx = np.argmax(output.cpu().numpy())
+
+        # Get the indices of the centroids which are [0.0, 0.0]
+        indices = (sorted_centroid_record == torch.tensor(
+            [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
+
+        # Apply penalty to output at those indices
+        output[0, indices] = -float('inf')
+
+        max_info_gain_centroid_idx = output.argmax(dim=1).item()
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
             0]
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
 
+    # for testing
     def predict_centroid(self, robot_position, robot_orientation, centroid_records, info_gain_records):
         """Predicts the best centroid based on the given robot position and orientation using the target network."""
         self.target_ddqn.eval()
@@ -302,11 +313,21 @@ class DDQNAgent:
         network_input, _, sorted_centroid_record = self.prepare_input(
             robot_position, robot_orientation, centroid_records, info_gain_records
         )
+
         with torch.no_grad():
             output = self.target_ddqn(network_input.to(self.device))
-        max_info_gain_centroid_idx = np.argmax(output.cpu().numpy())
+
+        # Get the indices of the centroids which are [0.0, 0.0]
+        indices = (sorted_centroid_record == torch.tensor(
+            [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
+
+        # Apply penalty to output at those indices
+        output[0, indices] = -float('inf')
+
+        max_info_gain_centroid_idx = output.argmax(dim=1).item()
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
             0]
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
+

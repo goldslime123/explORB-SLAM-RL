@@ -1,11 +1,23 @@
 import sys
 sys.path.append(
     '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/')
-
-from variables import *
 from csv_handler import *
 from agent import *
 
+# RL Parementers
+gazebo_env = 'aws_house'
+algo = 'dueling_ddqn'
+repeat_count = 5
+
+gamma = 0.90
+learning_rate = 0.0001
+epsilon = 1
+epsilon_min = 0.1
+epsilon_decay = 5e-7
+epochs = 50
+save_interval = 10
+batch_size = 1
+penalty = 0.5
 
 # csv
 folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data/' + \
@@ -14,7 +26,7 @@ folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/R
 combined_output_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/combined_results/' + gazebo_env +'/'+ \
     gazebo_env + '_'+ str(repeat_count) + '.csv'
 
-model_path = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dqn/{algo}_{repeat_count}.pth"
+model_path = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/{algo}/{algo}_{repeat_count}.pth"
 
 def train_model():
     combine_csv(folder_path, combined_output_path)
@@ -71,6 +83,9 @@ def test_model():
 
 
 if __name__ == "__main__":
+
+    
+    
     train_model()
     test_model()
 

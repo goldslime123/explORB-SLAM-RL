@@ -41,8 +41,9 @@ import os
 import sys
 sys.path.append(
     '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL')
+
+from variables import model_test, gazebo_env, output_size, repeat_count, no_frontier_counter, epsilon_min, epsilon_decay, output_size, algo, gazebo_env, gamma, learning_rate, epsilon, save_interval, epochs, batch_size, penalty
 from agent import *
-from variables import gazebo_env, output_size, repeat_count, no_frontier_counter, epsilon_min, epsilon_decay, output_size, algo, gazebo_env, gamma, learning_rate, epsilon, save_interval, epochs, batch_size, penalty
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,8 +72,40 @@ goal_cancel_pub_ = rospy.Publisher(
 counter = 0
 store_result = []
 
-unique_number = uuid.uuid4()
-shortened_number = str(unique_number)[:7]
+
+def generate_uuid():
+    # Define the CSV folder path
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data'
+    folder_path = os.path.join(csv_folder_path, gazebo_env, str(repeat_count))
+
+    # Check if the folder exists
+    if os.path.exists(folder_path):
+        # Get the list of files in the folder
+        files = os.listdir(folder_path)
+
+        # Filter the list to only include CSV files
+        csv_files = [file for file in files if file.endswith('.csv')]
+
+        # Extract the sequential numbers from CSV file names
+        # Start with 0 in case there are no existing numbers
+        existing_numbers = [0]
+        for file_name in csv_files:
+            number_part = file_name.split('-')[0]
+            if number_part.isdigit() and len(number_part) == 2:
+                existing_numbers.append(int(number_part))
+
+        # The next sequential number is one more than the highest existing number
+        sequential_number = max(existing_numbers) + 1
+    else:
+        sequential_number = 1
+
+    random_part = str(uuid.uuid4())[2:6]
+    new_uuid = f"{str(sequential_number).zfill(2)}-{random_part}"
+
+    return new_uuid
+
+
+shortened_number = generate_uuid()
 
 
 def does_row_exist(file_name, row_data):
@@ -159,7 +192,7 @@ def format_list(string):
 
 
 def format_list_of_list(string):
-    print(string)
+    # print(string)
 
     # Remove spaces after the first bracket
     string = string.replace("[ ", "[")
@@ -222,21 +255,30 @@ def test_model(robot_position, robot_orientation,
     # print(robot_position, robot_orientation,
     #       centroid_record, info_gain_record, best_centroid)
 
-    #  create model
-    model = Agent(algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+    model_path = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/{algo}/{model_test}.pth"
+    if os.path.exists(model_path):
+        print("Loaded model: "+ str(model_test)+'.pth')
+
+        model = Agent(model_path, algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                   save_interval, epochs, batch_size, penalty,
                   robot_position, robot_orientation,
                   centroid_record, info_gain_record, best_centroid)
 
-    # return tensor
-    predicted_centroid, predicted_centroid_index = model.predict_centroid(robot_position[0], robot_orientation[0],
-                                                                          centroid_record[0], info_gain_record[0])
+        # return tensor
+        predicted_centroid, predicted_centroid_index = model.predict_centroid(robot_position[0], robot_orientation[0],
+                                                                            centroid_record[0], info_gain_record[0])
 
-    # tensor to list
-    predicted_centroid = predicted_centroid.tolist()
-    predicted_centroid_index = predicted_centroid_index.tolist()
+        # tensor to list
+        predicted_centroid = predicted_centroid.tolist()
 
-    return predicted_centroid, predicted_centroid_index
+        # Access the first sublist
+        predicted_info_gain = info_gain_record[0][predicted_centroid_index]
+
+    else:
+        print("Model file does not exist.")
+  
+
+    return predicted_centroid, predicted_centroid_index, predicted_info_gain
 
 
 def log_warn_throttled(message):
@@ -625,53 +667,48 @@ def node():
                     info_centroid_record = dict(
                         zip(info_gain_record, centroid_record))
 
-                    robot_pose = robot_.getPoseAsGeometryMsg()
-                    print("Robot Pose: \n", robot_pose)
-
-                    rospy.loginfo(rospy.get_name() +
-                                  ": Centroids: \n" + format(centroid_record))
-                    rospy.loginfo(
-                        rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
-
-                    rospy.loginfo(
-                        rospy.get_name() + ": Info gain/Centroid: \n" + format(info_centroid_record))
-
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to centroid " +
-                                  format(centroid_record[winner_id]))
-
                     # Get robot's current pose
                     robot_position = robot_.getPose()[0]
                     robot_orientation = robot_.getPose()[1]
 
+                    predicted_centroid, predicted_centroid_index, predicted_info_gain = test_model(
+                        robot_position, robot_orientation, centroid_record, info_gain_record, centroid_record[winner_id])
+
+                    # print("Predicted Centroid: " + str(predicted_centroid))
+
+                    robot_pose = robot_.getPoseAsGeometryMsg()
+                    print("Robot Pose: \n", robot_pose)
+
+                    # rospy.loginfo(rospy.get_name() +
+                    #               ": Centroids: \n" + format(centroid_record))
+                    # rospy.loginfo(
+                    #     rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
+
+                    # rospy.loginfo(
+                    #     rospy.get_name() + ": Info gain/Centroid: \n" + format(info_centroid_record))
+
+                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to predicted centroid: " +
+                                  format(predicted_centroid) + " at Index: " + format(predicted_centroid_index)+" with information gain: " + format(predicted_info_gain))
+
                     store_csv()
                     # save_image()
 
-                    predicted_centroid, predicted_centroid_index = test_model(
-                        robot_position, robot_orientation, centroid_record, info_gain_record, centroid_record[winner_id])
-
-                    print("Predicted Centroid: " + str(predicted_centroid))
-
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
-                    robot_.sendGoal(centroid_record[winner_id], True)
-                    # robot_.sendGoal([2 ,2], True)
+                    # robot_.sendGoal(centroid_record[winner_id], True)
+                    robot_.sendGoal(predicted_centroid, True)
 
                     # If plan fails near to starting position, send new goal to the next best frontier
                     if robot_.getState() != 3:
                         euclidean_d = np.linalg.norm(
                             robot_.getPosition() - initial_plan_position)
+
                         if euclidean_d <= 2.0:
-                            new_goal = 2
-                            while robot_.getState() != 3 and new_goal <= len(info_gain_record):
-                                second_max = heapq.nlargest(
-                                    new_goal, info_gain_record)[1]
-                                winner_id = info_gain_record.index(second_max)
-                                rospy.logwarn(rospy.get_name() + ": Goal aborted near previous pose (eucl = " +
-                                              str(euclidean_d) + "). Sending new goal to: " +
-                                              str(centroid_record[winner_id]))
-                                robot_.sendGoal(
-                                    centroid_record[winner_id], True)
-                                new_goal = new_goal + 1
+                            rospy.logwarn(rospy.get_name() + ": Goal aborted near previous pose (eucl = " +
+                                          str(euclidean_d) + "). Sending new goal to: " +
+                                          str(predicted_centroid))
+                            robot_.sendGoal(
+                                predicted_centroid, True)
 
                         else:
                             rospy.logwarn(rospy.get_name() + ": Goal aborted away from previous pose (eucl = " +

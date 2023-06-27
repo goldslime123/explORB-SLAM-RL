@@ -3,9 +3,7 @@ import torch.nn as nn
 import numpy as np
 import random
 import os
-from collections import deque
 from replay_buffer import ReplayBuffer
-from variables import repeat_count
 
 class DuelingDQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -80,7 +78,7 @@ class DuelingDQNAgent:
 
         self.gazebo_env = gazebo_env
 
-        self.folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}'
+        self.folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dueling_dqn'
         # Create directory if it does not exist
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
@@ -254,24 +252,50 @@ class DuelingDQNAgent:
 
     def get_max_info_gain_centroid(self):
         self.target_dueling_dqn.eval()
+        """Finds the centroid with the highest information gain."""
         network_input, _, sorted_centroid_record = self.prepare_input(
-            self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr)
+            self.robot_post_arr, self.robot_orie_arr, self.centr_arr, self.info_arr
+        )
         with torch.no_grad():
             output = self.target_dueling_dqn(network_input.to(self.device))
-        max_info_gain_centroid_idx = np.argmax(output.cpu().numpy())
+
+        # Get the indices of the centroids which are [0.0, 0.0]
+        indices = (sorted_centroid_record == torch.tensor(
+            [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
+
+        # Apply penalty to output at those indices
+        output[0, indices] = -float('inf')
+
+        max_info_gain_centroid_idx = output.argmax(dim=1).item()
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
             0]
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
+
         return max_info_gain_centroid, max_info_gain_centroid_idx
 
+    # for testing
     def predict_centroid(self, robot_position, robot_orientation, centroid_records, info_gain_records):
+        """Predicts the best centroid based on the given robot position and orientation using the target network."""
         self.target_dueling_dqn.eval()
+
+        """Finds the centroid with the highest information gain."""
         network_input, _, sorted_centroid_record = self.prepare_input(
-            robot_position, robot_orientation, centroid_records, info_gain_records)
+            robot_position, robot_orientation, centroid_records, info_gain_records
+        )
+
         with torch.no_grad():
             output = self.target_dueling_dqn(network_input.to(self.device))
-        max_info_gain_centroid_idx = np.argmax(output.cpu().numpy())
+
+        # Get the indices of the centroids which are [0.0, 0.0]
+        indices = (sorted_centroid_record == torch.tensor(
+            [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
+
+        # Apply penalty to output at those indices
+        output[0, indices] = -float('inf')
+
+        max_info_gain_centroid_idx = output.argmax(dim=1).item()
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
             0]
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
+
         return max_info_gain_centroid, max_info_gain_centroid_idx

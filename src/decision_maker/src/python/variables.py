@@ -22,24 +22,22 @@ penalty - agent discourage from selecting centroid with [0,0]
 """
 gazebo_env = 'aws_house'
 
-# diff env paremeters
 if gazebo_env == "aws_house":
-    repeat_count = 10
-    explore_time = 600
+    algo = 'dqn'
+    model_test = f'{algo}_5'
+    repeat_count = 1
+    explore_time = 1500
     output_size = 10
     no_frontier_counter = 10
 
-    # RL Parementers
-    algo = 'dqn'
-    gamma = 0.95
+    # RL Parementers - need to load model (not used for training)
+    gamma = 0.90
     learning_rate = 0.0001
-
     epsilon = 1
     epsilon_min = 0.1
     epsilon_decay = 5e-7
-
-    epochs = 10
-    save_interval = 2
+    epochs = 50
+    save_interval = 10
     batch_size = 1
-    penalty = 0.8
+    penalty = 0.5
 

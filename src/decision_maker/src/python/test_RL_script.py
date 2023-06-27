@@ -8,7 +8,6 @@ import os
 import csv
 from variables import repeat_count, explore_time, gazebo_env, algo
 
-
 class ActiveSLAM:
     def __init__(self, repeat_count, explore_time, decision_maker, gazebo_env):
         self.repeat_count = repeat_count
