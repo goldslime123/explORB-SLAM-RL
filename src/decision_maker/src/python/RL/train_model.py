@@ -7,7 +7,7 @@ import torch
 # RL Parementers
 gazebo_env = 'aws_house'
 algo = 'dqn'
-repeat_count = 20
+repeat_count = 5
 
 gamma = 0.90
 learning_rate = 0.0001
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     
     
-    train_model()
-    # test_model()
+    # train_model()
+    test_model()
 
     

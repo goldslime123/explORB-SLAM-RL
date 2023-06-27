@@ -4,7 +4,7 @@ from ddqn import DDQNAgent
 from dueling_dqn import DuelingDQNAgent
 from dueling_ddqn import DuelingDDQNAgent
 from csv_handler import *
-
+import torch
 # import sys
 # sys.path.append('/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python')
 # from paremeter import *
@@ -38,9 +38,12 @@ class Agent:
         self.model = None
 
         self.model_path = model_path
+        self.model = self.initialize_model()
 
-        # Initialize the specific model based on the chosen algorithm
-        if algo == 'dqn':
+        
+    
+    def initialize_model(self):
+        if self.algorithm == 'dqn':
             self.model = DQNAgent(
                 self.model_path, self.gazebo_env, self.gamma, self.learning_rate,
                 self.epsilon, self.epsilon_min, self.epsilon_decay,
@@ -48,7 +51,7 @@ class Agent:
                 self.robot_post_arr, self.robot_orie_arr,
                 self.centr_arr, self.info_arr, self.best_centr_arr)
 
-        elif algo == 'ddqn':
+        elif self.algorithm == 'ddqn':
             self.model = DDQNAgent(
                 self.model_path, self.gazebo_env, self.gamma, self.learning_rate,
                 self.epsilon, self.epsilon_min, self.epsilon_decay,
@@ -56,7 +59,7 @@ class Agent:
                 self.robot_post_arr, self.robot_orie_arr,
                 self.centr_arr, self.info_arr, self.best_centr_arr)
 
-        elif algo == 'dueling_dqn':
+        elif self.algorithm == 'dueling_dqn':
             self.model = DuelingDQNAgent(
                 self.model_path, self.gazebo_env, self.gamma, self.learning_rate,
                 self.epsilon, self.epsilon_min, self.epsilon_decay,
@@ -64,7 +67,7 @@ class Agent:
                 self.robot_post_arr, self.robot_orie_arr,
                 self.centr_arr, self.info_arr, self.best_centr_arr)
 
-        elif algo == 'dueling_ddqn':
+        elif self.algorithm == 'dueling_ddqn':
             self.model = DuelingDDQNAgent(
                 self.model_path, self.gazebo_env, self.gamma, self.learning_rate,
                 self.epsilon, self.epsilon_min, self.epsilon_decay,
@@ -74,6 +77,8 @@ class Agent:
 
         else:
             raise ValueError("Invalid algorithm.")
+        
+        return self.model
 
     def save_model(self):
         """Saves the target DQN model."""
@@ -83,17 +88,8 @@ class Agent:
         """Loads the saved model into the target DQN."""
         self.model.load_model()
 
-    def initialize_dqn(self):
-        self.model.initialize_dqn()
+    
 
-    def initialize_ddqn(self):
-        self.model.initialize_ddqn()
-
-    def initialize_dueling_dqn(self):
-        self.model.initialize_dueling_dqn()
-
-    def initialize_dueling_ddqn(self):
-        self.model.initialize_dueling_ddqn()
 
     def train(self):
         self.model.train()  # Call the train method of the specific model

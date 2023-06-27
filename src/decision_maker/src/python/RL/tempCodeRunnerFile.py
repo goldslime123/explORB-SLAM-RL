@@ -1,2 +1,2 @@
 
-    epochs = 50
+repeat_count = 5
