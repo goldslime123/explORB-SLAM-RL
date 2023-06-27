@@ -25,8 +25,8 @@ gazebo_env = 'aws_house'
 if gazebo_env == "aws_house":
     algo = 'dqn'
     model_test = f'{algo}_5'
-    repeat_count = 1
-    explore_time = 1500
+    repeat_count = 5
+    explore_time = 850
     output_size = 10
     no_frontier_counter = 10
 

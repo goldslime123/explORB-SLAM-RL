@@ -204,8 +204,9 @@ def log_warn_throttled(message):
 def store_result_time(completed_time):
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/completed_time'
     folder_path = os.path.join(csv_folder_path, gazebo_env)
+    folder_path = folder_path +'/'+ 'train_result'
     file_name = os.path.join(
-        folder_path, 'train_result' + '_' + str(repeat_count) + '.csv')
+        folder_path,  'train_result' + '_' + str(repeat_count) + '.csv')
 
     if os.path.exists(folder_path):
         if os.path.exists(file_name):
@@ -226,7 +227,6 @@ def store_result_time(completed_time):
         os.makedirs(folder_path, exist_ok=True)
         with open(file_name, 'w', newline='') as file:
             writer = csv.writer(file, delimiter=' ')
-            writer.writerow(['csv file name', 'time'])
             writer.writerow([str(shortened_number), completed_time])
 
 

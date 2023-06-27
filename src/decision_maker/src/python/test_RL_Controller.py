@@ -325,8 +325,9 @@ def store_csv():
 def store_result_time(completed_time):
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/completed_time'
     folder_path = os.path.join(csv_folder_path, gazebo_env)
-    file_name = os.path.join(folder_path, algo + '_' + 'result' + '_' +
-                             str(repeat_count) + '.csv')
+    folder_path = folder_path +'/'+ algo
+    file_name = os.path.join(
+        folder_path,  algo + '_' + str(repeat_count) + '.csv')
 
     if os.path.exists(folder_path):
         if os.path.exists(file_name):
@@ -347,8 +348,8 @@ def store_result_time(completed_time):
         os.makedirs(folder_path, exist_ok=True)
         with open(file_name, 'w', newline='') as file:
             writer = csv.writer(file, delimiter=' ')
-            writer.writerow(['csv file name', 'time'])
             writer.writerow([str(shortened_number), completed_time])
+
 
 
 def save_image():
@@ -699,10 +700,9 @@ def node():
 
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to predicted centroid: " +
                                   format(predicted_centroid) + " at Index: " + format(predicted_centroid_index)+" with information gain: " + format(predicted_info_gain))
-
+                    # temp file
                     store_csv()
-                    # save_image()
-
+                    
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
                     # robot_.sendGoal(centroid_record[winner_id], True)
