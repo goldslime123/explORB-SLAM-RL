@@ -269,11 +269,12 @@ def test_model(robot_position, robot_orientation,
     if os.path.exists(model_path):
         print("Loaded model: "+ str(model_test)+'.pth')
 
+        # model
         model = Agent(model_path, algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
-                  save_interval, epochs, batch_size, penalty,
-                  robot_position, robot_orientation,
-                  centroid_record, info_gain_record, best_centroid)
-        
+                    save_interval, epochs, batch_size, penalty,
+                    robot_position, robot_orientation,
+                    centroid_record, info_gain_record, best_centroid)
+
         if algo == 'dqn':
             model.initialize_dqn()
         elif algo == 'ddqn':
