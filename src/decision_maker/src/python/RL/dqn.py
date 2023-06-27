@@ -123,7 +123,6 @@ class DQNAgent:
 
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.dqn.parameters())
-        self.save_model()
 
     def update_target_network(self):
         """Updates the target DQN parameters using the DQN parameters."""
