@@ -1,11 +1,12 @@
-from tensorflow.keras.applications.inception_v3 import InceptionV3
-from tensorflow.keras.applications.inception_v3 import preprocess_input
-from tensorflow.keras.preprocessing import image
+# libraries
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 import os
 import glob
 import shutil
+from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.applications.inception_v3 import preprocess_input
+from tensorflow.keras.preprocessing import image
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 def calculate_image_similarity(img_path1, img_path2):
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     # parameters
     gazebo_env = 'aws_house'
     # train_data, dqn, ddqn, dueling dqn, dueling ddqn
-    algo = 'train_data'
+    algo = 'dqn'
     repeat_count = 5
 
     base_folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/{gazebo_env}/{algo}/{repeat_count}'

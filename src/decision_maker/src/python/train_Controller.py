@@ -60,10 +60,6 @@ goal_cancel_pub_ = rospy.Publisher(
 counter = 0
 store_result = []
 
-
-
-
-
 def generate_uuid():
     # Define the CSV folder path
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data'

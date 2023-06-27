@@ -23,9 +23,12 @@ penalty - agent discourage from selecting centroid with [0,0]
 gazebo_env = 'aws_house'
 
 if gazebo_env == "aws_house":
+    # dqn, ddqn, dueling_dqn, dueling_ddqn
     algo = 'dqn'
-    model_test = f'{algo}_5'
-    repeat_count = 5
+    # dqn_5, dqn_10, dqn_15, dqn_20
+    number = 20
+    model_test = f'{algo}_{number}'
+    repeat_count = 20
     explore_time = 850
     output_size = 10
     no_frontier_counter = 10

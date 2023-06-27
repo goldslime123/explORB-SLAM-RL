@@ -75,7 +75,7 @@ store_result = []
 
 def generate_uuid():
     # Define the CSV folder path
-    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data'
+    csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/temp'
     folder_path = os.path.join(csv_folder_path, gazebo_env, str(repeat_count))
 
     # Check if the folder exists
@@ -87,8 +87,7 @@ def generate_uuid():
         csv_files = [file for file in files if file.endswith('.csv')]
 
         # Extract the sequential numbers from CSV file names
-        # Start with 0 in case there are no existing numbers
-        existing_numbers = [0]
+        existing_numbers = [0]  # Start with 0 in case there are no existing numbers
         for file_name in csv_files:
             number_part = file_name.split('-')[0]
             if number_part.isdigit() and len(number_part) == 2:
@@ -97,15 +96,15 @@ def generate_uuid():
         # The next sequential number is one more than the highest existing number
         sequential_number = max(existing_numbers) + 1
     else:
-        sequential_number = 1
+        sequential_number = 1  
 
     random_part = str(uuid.uuid4())[2:6]
     new_uuid = f"{str(sequential_number).zfill(2)}-{random_part}"
 
     return new_uuid
 
-
 shortened_number = generate_uuid()
+
 
 
 def does_row_exist(file_name, row_data):
