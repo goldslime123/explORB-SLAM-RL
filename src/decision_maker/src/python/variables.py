@@ -24,12 +24,14 @@ gazebo_env = 'aws_house'
 
 # diff env paremeters
 if gazebo_env == "aws_house":
-    repeat_count = 20
+    repeat_count = 1
     explore_time = 850
     # explore_time = 15*60
+    
     output_size = 10
     no_frontier_counter = 10
-    algo = 'ddqn'
+
+    algo = 'dqn'
     gamma = 0.95
     learning_rate = 0.0001
 
@@ -37,8 +39,8 @@ if gazebo_env == "aws_house":
     epsilon_min = 0.1
     epsilon_decay = 5e-7
 
-    epochs = 100
-    save_interval = 10
+    epochs = 10
+    save_interval = 2
     batch_size = 1
     penalty = 0.5
 

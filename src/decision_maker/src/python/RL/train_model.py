@@ -11,19 +11,20 @@ from agent import *
 folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data/' + \
     gazebo_env + '/' + str(repeat_count)
 
-output_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/combined_results/' + gazebo_env +'/'+ \
+combined_output_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/combined_results/' + gazebo_env +'/'+ \
     gazebo_env + '_'+ str(repeat_count) + '.csv'
 
+model_path = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dqn/{algo}_{repeat_count}.pth"
 
 def train_model():
-    combine_csv(folder_path, output_path)
+    combine_csv(folder_path, combined_output_path)
     # read dataframe
     robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_csv(
-        output_path)
+        combined_output_path)
     # print(robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids)
 
-    # create model
-    model = Agent(algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+    #  model
+    model = Agent(model_path, algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                   save_interval, epochs, batch_size, penalty,
                   robot_positions, robot_orientations,
                   centroid_records, info_gain_records, best_centroids)
@@ -44,10 +45,10 @@ def train_model():
 def test_model():
     # read dataframe
     robot_positions, robot_orientations, centroid_records, info_gain_records, best_centroids = read_csv(
-        output_path)
+        combined_output_path)
 
-    # create model
-    model = Agent(algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+    # model
+    model = Agent(model_path, algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                   save_interval, epochs, batch_size, penalty,
                   robot_positions, robot_orientations,
                   centroid_records, info_gain_records, best_centroids)

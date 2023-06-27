@@ -25,7 +25,7 @@ class DQN(nn.Module):
 
 
 class DQNAgent:
-    def __init__(self, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+    def __init__(self, model_path,gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # paremeters
         self.robot_post_arr = robot_post_arr[0]
@@ -54,13 +54,13 @@ class DQNAgent:
 
         self.gazebo_env = gazebo_env
 
-        self.folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}'
+        self.folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dqn'
         # Create directory if it does not exist
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
         
         
-        self.filepath = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dqn_{repeat_count}.pth"
+        self.filepath = model_path
         
 
 

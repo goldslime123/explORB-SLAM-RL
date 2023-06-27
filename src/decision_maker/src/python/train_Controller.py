@@ -61,14 +61,10 @@ counter = 0
 store_result = []
 
 
-sequential_number = 1
+
+
 
 def generate_uuid():
-    global sequential_number
-    sequential_part = str(sequential_number).zfill(2)
-    random_part = str(uuid.uuid4())[2:6]
-    new_uuid = f"{sequential_part}-{random_part}"
-
     # Define the CSV folder path
     csv_folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data'
     folder_path = os.path.join(csv_folder_path, gazebo_env, str(repeat_count))
@@ -82,31 +78,21 @@ def generate_uuid():
         csv_files = [file for file in files if file.endswith('.csv')]
 
         # Extract the sequential numbers from CSV file names
-        existing_numbers = set()
+        existing_numbers = [0]  # Start with 0 in case there are no existing numbers
         for file_name in csv_files:
             number_part = file_name.split('-')[0]
-            if number_part.isdigit():
-                existing_numbers.add(int(number_part))
+            if number_part.isdigit() and len(number_part) == 2:
+                existing_numbers.append(int(number_part))
 
-        # Find the first available sequential number
-        while sequential_number in existing_numbers:
-            sequential_number += 1
+        # The next sequential number is one more than the highest existing number
+        sequential_number = max(existing_numbers) + 1
+    else:
+        sequential_number = 1  
 
-    if sequential_number == 10:
-        sequential_number = 10
-
-    elif sequential_number == 20:
-        sequential_number = 20
-
+    random_part = str(uuid.uuid4())[2:6]
     new_uuid = f"{str(sequential_number).zfill(2)}-{random_part}"
 
-    # Update the existing_numbers set after generating the new UUID
-    existing_numbers.add(sequential_number)
-
-    sequential_number += 1
-
     return new_uuid
-
 
 shortened_number = generate_uuid()
 
