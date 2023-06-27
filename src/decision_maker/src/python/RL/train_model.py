@@ -7,7 +7,7 @@ import torch
 # RL Parementers
 gazebo_env = 'aws_house'
 algo = 'dqn'
-repeat_count = 5
+repeat_count = 20
 
 gamma = 0.90
 learning_rate = 0.0001
@@ -40,15 +40,6 @@ def train_model():
                   save_interval, epochs, batch_size, penalty,
                   robot_positions, robot_orientations,
                   centroid_records, info_gain_records, best_centroids)
-
-    if algo == 'dqn':
-        model.initialize_dqn()
-    elif algo == 'ddqn':
-        model.initialize_ddqn()
-    elif algo == 'dueling_dqn':
-        model.initialize_dueling_dqn()
-    elif algo == 'dueling_ddqn':
-        model.initialize_dueling_ddqn()
 
     # train model
     model.train()
