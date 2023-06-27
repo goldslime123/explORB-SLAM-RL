@@ -74,6 +74,8 @@ def test_model():
     elif algo == 'dueling_ddqn':
         model.initialize_dueling_ddqn()
 
+    model.load_model()
+
     # show result for each row
     for i in range(len(robot_positions)):
         predicted_centroid, max_info_gain_centroid_idx = model.predict_centroid(
@@ -87,6 +89,6 @@ if __name__ == "__main__":
     
     
     train_model()
-    test_model()
+    # test_model()
 
     
