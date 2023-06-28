@@ -81,6 +81,10 @@ class Agent:
         """Loads the saved model into the target DQN."""
         self.model.load_model()
 
+    def save_plot(self):
+        """Loads the saved model into the target DQN."""
+        self.model.save_plot()
+
     def train(self):
         self.model.train()  # Call the train method of the specific model
 

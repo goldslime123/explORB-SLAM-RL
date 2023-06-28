@@ -4,6 +4,10 @@ import numpy as np
 import random
 import os
 from replay_buffer import ReplayBuffer
+import matplotlib.pyplot as plt
+from train_model import repeat_count
+import numpy as np
+
 
 class DuelingDQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -50,7 +54,7 @@ class DuelingDQN(nn.Module):
 
 
 class DuelingDQNAgent:
-    def __init__(self, model_path,gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+    def __init__(self, model_path, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         self.robot_post_arr = robot_post_arr[0]
         self.robot_orie_arr = robot_orie_arr[0]
@@ -66,7 +70,7 @@ class DuelingDQNAgent:
 
         self.gamma = gamma
         self.learning_rate = learning_rate
-       
+
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -83,7 +87,14 @@ class DuelingDQNAgent:
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
 
+        self.folder_path_plot = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dueling_dqn/plot'
+        # Create directory if it does not exist
+        if not os.path.exists(self.folder_path_plot):
+            os.makedirs(self.folder_path_plot)
+
         self.filepath = model_path
+
+
 
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
@@ -91,6 +102,9 @@ class DuelingDQNAgent:
 
         # Initialize the replay buffer
         self.replay_buffer = ReplayBuffer(1000)
+
+        # plot loss
+        self.losses = []
 
         # Initialize the Dueling DQN network
         self.initialize_dueling_dqn()
@@ -136,7 +150,7 @@ class DuelingDQNAgent:
             self.save_model()
 
     def update_target_network(self):
-       self.target_dueling_dqn.load_state_dict(self.dueling_dqn.state_dict())
+        self.target_dueling_dqn.load_state_dict(self.dueling_dqn.state_dict())
 
     def save_model(self):
         torch.save(self.target_dueling_dqn.state_dict(), self.filepath)
@@ -239,19 +253,43 @@ class DuelingDQNAgent:
                          max_next_q_values - q_values)
 
                     targets = targets.expand_as(q_values)
-                    loss = self.criterion(q_values, targets)
+                    loss = self.criterion(targets, q_values)
+                    
+                    # Append the loss to the losses list
+                    self.losses.append(loss.item())
 
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
                     self.update_epsilon()
 
-            if self.epochs % self.save_interval == 0:
+            if (epoch+1) % self.save_interval == 0:
+                print("Updating target network")
                 self.update_target_network()
                 self.save_model()
 
-            print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
-        self.save_model()
+            print(f"Epoch: {epoch+1}, MSE Loss: {loss.item()}")
+
+    def save_plot(self):
+        epochs = range(1, self.epochs + 1)
+
+        losses = self.losses[:self.epochs]
+
+        plt.plot(epochs, losses, label='Loss')
+
+        # Calculate the trend line
+        z = np.polyfit(epochs, losses, 1)
+        p = np.poly1d(z)
+        plt.plot(epochs, p(epochs), "r--", label='Trend')
+
+        plt.title(f'Training Loss: Dueling_DQN_{str(repeat_count)}')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+
+        plt.legend()
+
+        # Save the plot to a file
+        plt.savefig(self.folder_path_plot + '/' + 'dueling_dqn' +'_' + str(repeat_count) + '.png')
 
     def update_epsilon(self):
         """Decays epsilon over time."""
@@ -271,7 +309,7 @@ class DuelingDQNAgent:
             [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
 
         # Apply penalty to output at those indices
-        output[0, indices] = -float('inf')
+        output[0, indices] = -self.penalty
 
         max_info_gain_centroid_idx = output.argmax(dim=1).item()
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
@@ -298,7 +336,7 @@ class DuelingDQNAgent:
             [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
 
         # Apply penalty to output at those indices
-        output[0, indices] = -float('inf')
+        output[0, indices] = -self.penalty
 
         max_info_gain_centroid_idx = output.argmax(dim=1).item()
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[

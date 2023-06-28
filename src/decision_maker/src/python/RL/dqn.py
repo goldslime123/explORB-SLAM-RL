@@ -4,25 +4,21 @@ import random
 import os
 from collections import deque
 from replay_buffer import ReplayBuffer
-
+import matplotlib.pyplot as plt
+from train_model import repeat_count
+import numpy as np
 
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
         super(DQN, self).__init__()
-        self.fc1 = nn.Linear(input_size, 256)
-        self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(128, 64)
-        self.fc4 = nn.Linear(64, 32)
-        self.fc5 = nn.Linear(32, 16)
-        self.fc6 = nn.Linear(16, output_size)
+        self.fc1 = nn.Linear(input_size, 128)
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, output_size)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
-        x = torch.relu(self.fc3(x))
-        x = torch.relu(self.fc4(x))
-        x = torch.relu(self.fc5(x))
-        x = self.fc6(x)
+        x = self.fc3(x)
         return x
 
 
@@ -61,6 +57,11 @@ class DQNAgent:
         # Create directory if it does not exist
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
+
+        self.folder_path_plot = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dqn/plot'
+        # Create directory if it does not exist
+        if not os.path.exists(self.folder_path_plot):
+            os.makedirs(self.folder_path_plot)
         
         
         self.filepath = model_path
@@ -73,6 +74,9 @@ class DQNAgent:
 
         # Initialize the replay buffer
         self.replay_buffer = ReplayBuffer(10000)  
+
+        # plot loss
+        self.losses = []
 
         # Initialize the DQN network
         self.initialize_dqn()
@@ -134,6 +138,7 @@ class DQNAgent:
 
     def update_target_network(self):
         """Updates the target DQN parameters using the DQN parameters."""
+        
         self.target_dqn.load_state_dict(self.dqn.state_dict())
 
     def save_model(self):
@@ -238,8 +243,6 @@ class DQNAgent:
                     # Compute the Q-values for the next states using the online network:
                     q_values = self.dqn(states)
 
-                    # print(q_values)
-
                     # Compute the Q-values for the next states using the target DQN network:
                     next_q_values = self.target_dqn(next_states)
 
@@ -254,6 +257,8 @@ class DQNAgent:
 
                     targets = targets.expand_as(q_values)
                     loss = self.criterion(q_values, targets)
+                    # Append the loss to the losses list
+                    self.losses.append(loss.item())
 
                     # Clear previously calculated gradients
                     self.optimizer.zero_grad()
@@ -263,15 +268,37 @@ class DQNAgent:
                     self.optimizer.step()
                     self.update_epsilon()
 
-            if self.epochs % self.save_interval == 0:
+            if (epoch+1) % self.save_interval == 0:
+                print("Updating target network")
                 self.update_target_network()
                 self.save_model()
 
-            print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
+            print(f"Epoch: {epoch+1}, MSE Loss: {loss.item()}")
 
-        # Save the final model
-        self.save_model()
 
+    def save_plot(self):
+        epochs = range(1, self.epochs + 1)
+
+        # Assuming self.losses is a list that stores the loss for each epoch up to self.epoch
+        losses = self.losses[:self.epochs]
+
+        plt.plot(epochs, losses, label='Loss')
+
+        # Calculate the trend line
+        z = np.polyfit(epochs, losses, 1)
+        p = np.poly1d(z)
+        plt.plot(epochs, p(epochs), "r--", label='Trend')
+
+        plt.title(f'Training Loss: DQN_{str(repeat_count)}')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+
+        plt.legend()
+
+        # Save the plot to a file
+        plt.savefig(self.folder_path_plot + '/' + 'dqn' + '_' + str(repeat_count) + '.png')
+
+        # plt.show()
     def update_epsilon(self):
         """Decays epsilon over time."""
         self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
@@ -290,7 +317,7 @@ class DQNAgent:
             [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
 
         # Apply penalty to output at those indices
-        output[0, indices] = -float('inf')
+        output[0, indices] = -self.penalty
 
         max_info_gain_centroid_idx = output.argmax(dim=1).item()
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[
@@ -317,7 +344,7 @@ class DQNAgent:
             [0.0, 0.0])).all(1).nonzero(as_tuple=True)[0]
 
         # Apply penalty to output at those indices
-        output[0, indices] = -float('inf')
+        output[0, indices] = -self.penalty
 
         max_info_gain_centroid_idx = output.argmax(dim=1).item()
         max_info_gain_centroid_idx = max_info_gain_centroid_idx % sorted_centroid_record.shape[

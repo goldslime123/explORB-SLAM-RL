@@ -7,17 +7,16 @@ from agent import *
 # RL Parementers
 gazebo_env = 'aws_house'
 algo = 'dueling_ddqn'
-repeat_count = 5
-
+repeat_count = 20
 gamma = 0.90
-learning_rate = 0.0001
+learning_rate = 0.01
 epsilon = 1
 epsilon_min = 0.1
-epsilon_decay = 5e-7
-epochs = 50
+epsilon_decay = 0.01
+epochs = 100
 save_interval = 10
 batch_size = 1
-penalty = 0.5
+penalty = 10
 
 # csv
 folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data/' + \
@@ -43,6 +42,7 @@ def train_model():
 
     # train model
     model.train()
+    model.save_plot()
 
 
 def test_model():
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     
     
-    # train_model()
-    test_model()
+    train_model()
+    # test_model()
 
     
