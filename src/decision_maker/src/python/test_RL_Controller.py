@@ -42,7 +42,7 @@ import sys
 sys.path.append(
     '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL')
 
-from variables import model_test, gazebo_env, output_size, repeat_count, no_frontier_counter, epsilon_min, epsilon_decay, output_size, algo, gazebo_env, gamma, learning_rate, epsilon, save_interval, epochs, batch_size, penalty
+from variables import model_name, gazebo_env, output_size, repeat_count, no_frontier_counter, epsilon_min, epsilon_decay, output_size, algo, gazebo_env, gamma, learning_rate, epsilon, save_interval, epochs, batch_size, penalty
 from agent import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -264,9 +264,9 @@ def test_model(robot_position, robot_orientation,
     # print(robot_position, robot_orientation,
     #       centroid_record, info_gain_record, best_centroid)
 
-    model_path = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/{algo}/{model_test}.pth"
+    model_path = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/{algo}/{model_name}.pth"
     if os.path.exists(model_path):
-        print("Loaded model: "+ str(model_test)+'.pth')
+        print("Loaded model: "+ str(model_name)+'.pth')
 
         # model
         model = Agent(model_path, algo, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
@@ -691,8 +691,8 @@ def node():
                     robot_pose = robot_.getPoseAsGeometryMsg()
                     print("Robot Pose: \n", robot_pose)
 
-                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to predicted centroid: " +
-                                  format(predicted_centroid) + " at Index: " + format(predicted_centroid_index)+" with information gain: " + format(predicted_info_gain))
+                    rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to Predicted centroid: " +
+                                  format(predicted_centroid) + " at Index: " + format(predicted_centroid_index)+" with Information gain: " + format(predicted_info_gain))
                     # temp file
                     store_csv()
 

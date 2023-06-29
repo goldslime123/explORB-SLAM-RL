@@ -16,6 +16,9 @@ class ActiveSLAM:
         self.gazebo_env = gazebo_env
         self.ctrl_c_pressed = False
 
+        self.gazebo_process = None
+        self.decision_maker_process = None
+
         # Register the handler function for the SIGINT signal
         signal.signal(signal.SIGINT, self.sigint_handler)
 
@@ -26,11 +29,11 @@ class ActiveSLAM:
 
     def roslaunch_gazebo_decision_maker(self):
         # Launch Gazebo environment and decision-maker component
-        subprocess.Popen(['roslaunch', 'robot_description',
-                         str(self.gazebo_env+".launch")])
+        self.gazebo_process = subprocess.Popen(
+            ['roslaunch', 'robot_description', str(self.gazebo_env+".launch")])
         time.sleep(5)
-        subprocess.Popen(['roslaunch', 'decision_maker',
-                         str(self.decision_maker+".launch")])
+        self.decision_maker_process = subprocess.Popen(
+            ['roslaunch', 'decision_maker', str(self.decision_maker+".launch")])
 
     def kill_ros_process(self):
         # Kill ROS processes
@@ -40,6 +43,8 @@ class ActiveSLAM:
     def kill_robot_description_node(self):
         # Kill specific ROS nodes related to the robot description
         subprocess.run(['rosnode', 'kill', '/gazebo'])
+        if self.gazebo_process is not None:
+            self.gazebo_process.kill()
         subprocess.run(['rosnode', 'kill', '/orb_slam2_rgbd'])
         subprocess.run(['rosnode', 'kill', '/robot_1/move_base_node'])
         subprocess.run(['rosnode', 'kill', '/robot_1/robot_state_publisher'])
@@ -49,9 +54,12 @@ class ActiveSLAM:
     def kill_decision_maker_node(self):
         # Kill specific ROS nodes related to the decision-maker component
         subprocess.run(['rosnode', 'kill', '/decision_maker'])
+        if self.decision_maker_process is not None:
+            self.decision_maker_process.kill()
         subprocess.run(['rosnode', 'kill', '/G_publisher'])
         subprocess.run(['rosnode', 'kill', '/gridmapper'])
         subprocess.run(['rosnode', 'kill', '/octomapper'])
+        subprocess.run(['rosnode', 'kill', '/listener_node'])
         subprocess.run(
             ['rosnode', 'kill', '/frontier_detectors/global_detector'])
         subprocess.run(
@@ -69,8 +77,6 @@ class ActiveSLAM:
         print("Ctrl+C detected! Performing cleanup...")
         self.kill_all_process()
         self.ctrl_c_pressed = True
-    
-    
 
     def check_new_csv_files(self):
         folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data' + \
@@ -97,7 +103,7 @@ class ActiveSLAM:
         window_title = 'config.rviz - RViz'
         name_not_completed = str(csv_name) + '_not_completed' + '.png'
         file_path_not_completed = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/' + gazebo_env + '/train_data' \
-             + '/' + str(repeat_count) + '/not_completed'
+            + '/' + str(repeat_count) + '/not_completed'
         save_path_not_completed = os.path.join(
             file_path_not_completed, name_not_completed)
 
@@ -121,7 +127,7 @@ class ActiveSLAM:
 
         name_completed = str(csv_name) + '_completed' + '.png'
         file_path_completed = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/' + gazebo_env + '/train_data' \
-             + '/' + str(repeat_count) + '/completed'
+            + '/' + str(repeat_count) + '/completed'
         save_path_completed = os.path.join(file_path_completed, name_completed)
         # print(save_path_completed)
 
