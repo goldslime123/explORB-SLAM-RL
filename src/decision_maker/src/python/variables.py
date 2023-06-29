@@ -26,21 +26,23 @@ if gazebo_env == "aws_house":
     # dqn, ddqn, dueling_dqn, dueling_ddqn
     algo = 'dqn'
     # dqn_5, dqn_10, dqn_15, dqn_20
-    number = 20
-    model_test = f'{algo}_{number}'
-    repeat_count = 20
+    model_num = 15
+    model_test = f'{algo}_{model_num}'
+
+    repeat_count = 15
     explore_time = 850
+    
     output_size = 10
     no_frontier_counter = 10
 
     # RL Parementers - need to load model (not used for training)
     gamma = 0.90
-    learning_rate = 0.0001
+    learning_rate = 0.01
     epsilon = 1
     epsilon_min = 0.1
-    epsilon_decay = 5e-7
-    epochs = 50
+    epsilon_decay = 0.01
+    epochs = 100
     save_interval = 10
     batch_size = 1
-    penalty = 0.5
+    penalty = 10
 

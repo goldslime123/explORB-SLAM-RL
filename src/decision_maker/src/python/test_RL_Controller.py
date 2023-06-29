@@ -678,9 +678,7 @@ def node():
 
                     winner_id = info_gain_record.index(
                         np.max(info_gain_record))
-                    info_centroid_record = dict(
-                        zip(info_gain_record, centroid_record))
-
+                    
                     # Get robot's current pose
                     robot_position = robot_.getPose()[0]
                     robot_orientation = robot_.getPose()[1]
@@ -693,22 +691,16 @@ def node():
                     robot_pose = robot_.getPoseAsGeometryMsg()
                     print("Robot Pose: \n", robot_pose)
 
-                    # rospy.loginfo(rospy.get_name() +
-                    #               ": Centroids: \n" + format(centroid_record))
-                    # rospy.loginfo(
-                    #     rospy.get_name() + ": Information gain: \n" + format(info_gain_record))
-
-                    # rospy.loginfo(
-                    #     rospy.get_name() + ": Info gain/Centroid: \n" + format(info_centroid_record))
-
                     rospy.loginfo(rospy.get_name() + ": " + format(robot_name) + " assigned to predicted centroid: " +
                                   format(predicted_centroid) + " at Index: " + format(predicted_centroid_index)+" with information gain: " + format(predicted_info_gain))
                     # temp file
                     store_csv()
+
+                    # save_image()
+                    
                     
                     # Send goal to robot
                     initial_plan_position = robot_.getPosition()
-                    # robot_.sendGoal(centroid_record[winner_id], True)
                     robot_.sendGoal(predicted_centroid, True)
 
                     # If plan fails near to starting position, send new goal to the next best frontier
