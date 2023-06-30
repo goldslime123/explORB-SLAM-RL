@@ -1,13 +1,15 @@
+from agent import *
+from csv_handler import *
 import sys
+import matplotlib.pyplot as plt
+import torch
 sys.path.append(
     '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/')
-from csv_handler import *
-from agent import *
 
 # RL Parementers
 gazebo_env = 'aws_house'
-algo = 'dueling_ddqn'
-repeat_count = 20
+algo = 'dqn'
+repeat_count = 5
 gamma = 0.90
 learning_rate = 0.01
 epsilon = 1
@@ -22,10 +24,11 @@ penalty = 10
 folder_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/train_data/' + \
     gazebo_env + '/' + str(repeat_count)
 
-combined_output_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/combined_results/' + gazebo_env +'/'+ \
-    gazebo_env + '_'+ str(repeat_count) + '.csv'
+combined_output_path = '/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/csv/combined_results/' + gazebo_env + '/' + \
+    gazebo_env + '_' + str(repeat_count) + '.csv'
 
 model_path = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/{algo}/{algo}_{repeat_count}.pth"
+
 
 def train_model():
     combine_csv(folder_path, combined_output_path)
@@ -58,7 +61,6 @@ def test_model():
 
     model.load_model()
 
-
     # show result for each row
     for i in range(len(robot_positions)):
         predicted_centroid, max_info_gain_centroid_idx = model.predict_centroid(
@@ -70,8 +72,5 @@ def test_model():
 if __name__ == "__main__":
 
     
-    
-    train_model()
-    # test_model()
-
-    
+    # train_model()
+    test_model()

@@ -98,7 +98,7 @@ class DuelingDDQNAgent:
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
 
-        self.folder_path_plot = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/models/{gazebo_env}/dueling_ddqn/plot'
+        self.folder_path_plot = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/plots/{gazebo_env}/dueling_ddqn'
         # Create directory if it does not exist
         if not os.path.exists(self.folder_path_plot):
             os.makedirs(self.folder_path_plot)
