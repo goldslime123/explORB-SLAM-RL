@@ -26,10 +26,10 @@ if gazebo_env == "aws_house":
     # dqn, ddqn, dueling_dqn, dueling_ddqn
     algo = 'dueling_dqn'
     # dqn_5, dqn_10, dqn_15, dqn_20
-    model_name = f'{algo}_15'
+    model_name = f'{algo}_20'
 
-    repeat_count = 10
-    explore_time = 800
+    repeat_count = 20
+    explore_time = 850
     
     output_size = 10
     no_frontier_counter = 10
