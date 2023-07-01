@@ -44,10 +44,13 @@ if __name__ == "__main__":
     algos = ['dqn', 'ddqn', 'dueling_dqn', 'dueling_ddqn']
     repeat_counts = [5, 10, 15, 20]
 
+    best_picture = '11-501a_completed'
+
+
     for algo in algos:
         for repeat_count in repeat_counts:
             base_folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/{gazebo_env}/{algo}/{repeat_count}'
-            original_img = "/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/similar_images/base/aws_house.png"
+            original_img = f"/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/similar_images/base/{best_picture}.png"
 
             # Create a new directory to store similar images
             similar_images_folder = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/similar_images/{gazebo_env}/{algo}'
@@ -68,11 +71,15 @@ if __name__ == "__main__":
                     similarity = similarity * 100
                     similarity = round(similarity)
 
-                    # If similarity is more than 75%
-                    if similarity >= 75:
+                    # If similarity is more than 80
+                    # If similarity is more than 80
+                    if similarity >= 80:
                         # Construct new path for the image
-                        new_img_path = os.path.join(
-                            similar_images_folder, os.path.basename(img2_path))
+                        img_filename = os.path.basename(img2_path)
+                        img_name, img_ext = os.path.splitext(img_filename)
+                        img_name = img_name.replace('_completed', '') 
+                        new_img_filename = f"{img_name}_{similarity}%{img_ext}"
+                        new_img_path = os.path.join(similar_images_folder, new_img_filename)
 
                         # Copy the image to the new directory
                         shutil.copy2(img2_path, new_img_path)
