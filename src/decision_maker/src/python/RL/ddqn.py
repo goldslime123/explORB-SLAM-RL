@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 import random
 import os
-from collections import deque
-from replay_buffer import ReplayBuffer
-import matplotlib.pyplot as plt
-from train_model import repeat_count
 import numpy as np
+import matplotlib.pyplot as plt
+from replay_buffer import ReplayBuffer
+from train_model import repeat_count
+
 
 class DDQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -20,25 +20,6 @@ class DDQN(nn.Module):
         x = torch.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-
-
-class ReplayBuffer:
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.buffer = deque(maxlen=capacity)
-
-    def push(self, state, action, reward, next_state, done):
-        experience = (state, action, reward, next_state, done)
-        self.buffer.append(experience)
-
-    def sample(self, batch_size):
-        state_batch, action_batch, reward_batch, next_state_batch, done_batch = zip(
-            *random.sample(self.buffer, batch_size)
-        )
-        return state_batch, action_batch, reward_batch, next_state_batch, done_batch
-
-    def __len__(self):
-        return len(self.buffer)
 
 
 class DDQNAgent:
@@ -80,10 +61,9 @@ class DDQNAgent:
         # Create directory if it does not exist
         if not os.path.exists(self.folder_path_plot):
             os.makedirs(self.folder_path_plot)
-            
+
         self.filepath = model_path
-        
-        
+
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.dones = None
@@ -91,7 +71,7 @@ class DDQNAgent:
         # Initialize the replay buffer
         self.replay_buffer = ReplayBuffer(1000)
 
-         # plot loss
+        # plot loss
         self.losses = []
 
         # Initialize the DDQN network
@@ -140,7 +120,7 @@ class DDQNAgent:
             network_input.shape[1], output_size).to(self.device)
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.ddqn.parameters())
-        
+
         # Check if a model already exists
         if os.path.isfile(self.filepath):
             # If a model does exist, load it
@@ -258,7 +238,7 @@ class DDQNAgent:
 
                     # Select the action with the highest Q-value using the online network
                     next_q_values = self.ddqn(next_states)
-                    
+
                     # diff here
                     next_actions = next_q_values.argmax(dim=1, keepdim=True)
 
@@ -276,7 +256,7 @@ class DDQNAgent:
                     targets = targets.expand_as(q_values)
                     loss = self.criterion(q_values, targets)
 
-                     # Append the loss to the losses list
+                    # Append the loss to the losses list
                     self.losses.append(loss.item())
 
                     self.optimizer.zero_grad()
@@ -310,7 +290,8 @@ class DDQNAgent:
         plt.legend()
 
         # Save the plot to a file
-        plt.savefig(self.folder_path_plot + '/' + 'ddqn' +'_' + str(repeat_count) + '.png')
+        plt.savefig(self.folder_path_plot + '/' + 'ddqn' +
+                    '_' + str(repeat_count) + '.png')
 
     def update_epsilon(self):
         """Decays epsilon over time."""
@@ -365,4 +346,3 @@ class DDQNAgent:
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
-

@@ -5,7 +5,6 @@ import time
 import rospy
 import signal
 import os
-import csv
 from variables import repeat_count, explore_time, gazebo_env, algo
 
 

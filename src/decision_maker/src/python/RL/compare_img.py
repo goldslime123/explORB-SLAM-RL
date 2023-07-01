@@ -46,7 +46,6 @@ if __name__ == "__main__":
 
     best_picture = '11-501a_completed'
 
-
     for algo in algos:
         for repeat_count in repeat_counts:
             base_folder_path = f'/home/kenji_leong/explORB-SLAM-RL/src/decision_maker/src/python/RL/rviz_results/{gazebo_env}/{algo}/{repeat_count}'

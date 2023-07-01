@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 import random
 import os
-from collections import deque
-from replay_buffer import ReplayBuffer
 import matplotlib.pyplot as plt
-from train_model import repeat_count
 import numpy as np
+from replay_buffer import ReplayBuffer
+from train_model import repeat_count
+
 
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -22,9 +22,8 @@ class DQN(nn.Module):
         return x
 
 
-
 class DQNAgent:
-    def __init__(self, model_path,gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+    def __init__(self, model_path, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # paremeters
         self.robot_post_arr = robot_post_arr[0]
@@ -62,18 +61,15 @@ class DQNAgent:
         # Create directory if it does not exist
         if not os.path.exists(self.folder_path_plot):
             os.makedirs(self.folder_path_plot)
-        
-        
-        self.filepath = model_path
-        
 
+        self.filepath = model_path
 
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.dones = None
 
         # Initialize the replay buffer
-        self.replay_buffer = ReplayBuffer(10000)  
+        self.replay_buffer = ReplayBuffer(10000)
 
         # plot loss
         self.losses = []
@@ -127,7 +123,7 @@ class DQNAgent:
 
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.dqn.parameters())
-        
+
         # Check if a model already exists
         if os.path.isfile(self.filepath):
             # If a model does exist, load it
@@ -138,7 +134,7 @@ class DQNAgent:
 
     def update_target_network(self):
         """Updates the target DQN parameters using the DQN parameters."""
-        
+
         self.target_dqn.load_state_dict(self.dqn.state_dict())
 
     def save_model(self):
@@ -200,7 +196,6 @@ class DQNAgent:
 
     def train(self):
         self.dones = torch.zeros((1,), device=self.device)
-       
 
         for epoch in range(self.epochs):
             for i in range(len(self.robot_post_arr2)-1):
@@ -275,7 +270,6 @@ class DQNAgent:
 
             print(f"Epoch: {epoch+1}, MSE Loss: {loss.item()}")
 
-
     def save_plot(self):
         epochs = range(1, self.epochs + 1)
 
@@ -296,7 +290,8 @@ class DQNAgent:
         plt.legend()
 
         # Save the plot to a file
-        plt.savefig(self.folder_path_plot + '/' + 'dqn' + '_' + str(repeat_count) + '.png')
+        plt.savefig(self.folder_path_plot + '/' + 'dqn' +
+                    '_' + str(repeat_count) + '.png')
 
         # plt.show()
     def update_epsilon(self):
@@ -352,4 +347,3 @@ class DQNAgent:
         max_info_gain_centroid = sorted_centroid_record[max_info_gain_centroid_idx]
 
         return max_info_gain_centroid, max_info_gain_centroid_idx
-

@@ -69,4 +69,3 @@ def calculate_average_from_csv(file_path):
         return average
     else:
         return None
-

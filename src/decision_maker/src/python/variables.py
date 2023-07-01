@@ -12,7 +12,6 @@ gazebo_env = 'aws_house'
 
 # able to map all areas
 if gazebo_env == "aws_house":
-
     repeat_count = 1
     explore_time = 700
     
@@ -24,6 +23,7 @@ if gazebo_env == "aws_house":
 if gazebo_env == "aws_bookstore":
     repeat_count = 1
     explore_time = 30*60
+    
     output_size = 10
     no_frontier_counter = 10
 

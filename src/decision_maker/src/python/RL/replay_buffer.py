@@ -1,6 +1,7 @@
 from collections import deque
 import random
 
+# store and sample the robot state observation
 class ReplayBuffer:
     def __init__(self, capacity):
         self.capacity = capacity

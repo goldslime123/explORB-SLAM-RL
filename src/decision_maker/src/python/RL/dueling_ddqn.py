@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 import random
 import os
-from collections import deque
-from replay_buffer import ReplayBuffer
 import matplotlib.pyplot as plt
-from train_model import repeat_count
 import numpy as np
+from replay_buffer import ReplayBuffer
+from train_model import repeat_count
+
 
 class DuelingDDQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -44,27 +44,8 @@ class DuelingDDQN(nn.Module):
         return q_values
 
 
-class ReplayBuffer:
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.buffer = deque(maxlen=capacity)
-
-    def push(self, state, action, reward, next_state, done):
-        experience = (state, action, reward, next_state, done)
-        self.buffer.append(experience)
-
-    def sample(self, batch_size):
-        state_batch, action_batch, reward_batch, next_state_batch, done_batch = zip(
-            *random.sample(self.buffer, batch_size)
-        )
-        return state_batch, action_batch, reward_batch, next_state_batch, done_batch
-
-    def __len__(self):
-        return len(self.buffer)
-
-
 class DuelingDDQNAgent:
-    def __init__(self, model_path,gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
+    def __init__(self, model_path, gazebo_env, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay,
                  save_interval, epochs, batch_size, penalty, robot_post_arr, robot_orie_arr, centr_arr, info_arr, best_centr_arr):
         # Parameters
         self.robot_post_arr = robot_post_arr[0]
@@ -81,7 +62,7 @@ class DuelingDDQNAgent:
 
         self.gamma = gamma
         self.learning_rate = learning_rate
-        
+
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -102,10 +83,9 @@ class DuelingDDQNAgent:
         # Create directory if it does not exist
         if not os.path.exists(self.folder_path_plot):
             os.makedirs(self.folder_path_plot)
-            
+
         self.filepath = model_path
 
-    
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.dones = None
@@ -115,7 +95,6 @@ class DuelingDDQNAgent:
 
         # plot loss
         self.losses = []
-
 
         # Initialize the Dueling DDQN network
         self.initialize_dueling_ddqn()
@@ -164,7 +143,7 @@ class DuelingDDQNAgent:
             network_input.shape[1], output_size).to(self.device)
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.dueling_ddqn.parameters())
-        
+
         # Check if a model already exists
         if os.path.isfile(self.filepath):
             # If a model does exist, load it
@@ -334,7 +313,8 @@ class DuelingDDQNAgent:
         plt.legend()
 
         # Save the plot to a file
-        plt.savefig(self.folder_path_plot + '/' + 'dueling_ddqn' +'_' + str(repeat_count) + '.png')
+        plt.savefig(self.folder_path_plot + '/' + 'dueling_ddqn' +
+                    '_' + str(repeat_count) + '.png')
 
     def update_epsilon(self):
         """Decays epsilon over time."""

@@ -1,12 +1,11 @@
 import torch
 import torch.nn as nn
-import numpy as np
 import random
 import os
-from replay_buffer import ReplayBuffer
 import matplotlib.pyplot as plt
-from train_model import repeat_count
 import numpy as np
+from replay_buffer import ReplayBuffer
+from train_model import repeat_count
 
 
 class DuelingDQN(nn.Module):
@@ -93,8 +92,6 @@ class DuelingDQNAgent:
             os.makedirs(self.folder_path_plot)
 
         self.filepath = model_path
-
-
 
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
@@ -254,7 +251,7 @@ class DuelingDQNAgent:
 
                     targets = targets.expand_as(q_values)
                     loss = self.criterion(targets, q_values)
-                    
+
                     # Append the loss to the losses list
                     self.losses.append(loss.item())
 
@@ -289,7 +286,8 @@ class DuelingDQNAgent:
         plt.legend()
 
         # Save the plot to a file
-        plt.savefig(self.folder_path_plot + '/' + 'dueling_dqn' +'_' + str(repeat_count) + '.png')
+        plt.savefig(self.folder_path_plot + '/' + 'dueling_dqn' +
+                    '_' + str(repeat_count) + '.png')
 
     def update_epsilon(self):
         """Decays epsilon over time."""
