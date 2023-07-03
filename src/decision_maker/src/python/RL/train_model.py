@@ -6,7 +6,7 @@ sys.path.append(
 
 # RL Parementers
 gazebo_env = 'aws_house'
-algo = 'dueling_ddqn'
+algo = 'dqn'
 repeat_count = 5
 gamma = 0.90
 learning_rate = 0.01
@@ -68,5 +68,5 @@ def test_model():
 
 
 if __name__ == "__main__":
-    # train_model()
+    train_model()
     test_model()
