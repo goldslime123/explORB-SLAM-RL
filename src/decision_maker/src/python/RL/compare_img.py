@@ -96,7 +96,7 @@ if __name__ == "__main__":
     # List of comparison models - vgg, resnet, inception
     cnn_models = ['vgg16', 'resnet50', 'inceptionV3']
 
-    best_picture = '11-501a_completed'
+    best_picture = '01-0a19_completed'
 
     for algo in algos:
         for repeat_count in repeat_counts:
@@ -114,9 +114,9 @@ if __name__ == "__main__":
                     folder_path = os.path.join(base_folder_path, sub_folder)
 
                     for img2_path in glob.glob(os.path.join(folder_path, '**', '*.png'), recursive=True):
-                        if cnn_model == 'inception':
+                        if cnn_model == 'inceptionV3':
                             similarity = calculate_image_similarity_inception(original_img, img2_path)
-                        elif cnn_model == 'vgg':
+                        elif cnn_model == 'vgg16':
                             similarity = calculate_image_similarity_vgg(original_img, img2_path)
                         else:
                             similarity = calculate_image_similarity_resnet(original_img, img2_path)
@@ -125,7 +125,7 @@ if __name__ == "__main__":
                             similarity = similarity * 100
                             similarity = round(similarity)
 
-                        if similarity >= 80:
+                        if similarity >= 75:
                             img_filename = os.path.basename(img2_path)
                             img_name, img_ext = os.path.splitext(img_filename)
                             img_name = img_name.replace('_completed', '')
@@ -136,3 +136,4 @@ if __name__ == "__main__":
                             print(f'Image {img2_path} copied to {new_img_path}')
 
                         print(f'Similarity between {original_img} and {img2_path}: {similarity}%')
+

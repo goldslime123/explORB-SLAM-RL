@@ -41,9 +41,8 @@ batch_size - model update one experience at a time (will always be 1)
 penalty - agent discourage from selecting centroid with [0,0]
 """
 # dqn_5, dqn_10, dqn_15, dqn_20
-algo = 'dueling_ddqn'
-model_name = f'{algo}_15'
-
+algo = 'dqn'
+model_name = f'{algo}_5'
 gamma = 0.90
 learning_rate = 0.01
 epsilon = 1

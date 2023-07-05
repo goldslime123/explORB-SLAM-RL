@@ -104,6 +104,7 @@ class DQNAgent:
         # Reshape the network input
         input_size = network_input.numel()
 
+
         network_input = network_input.reshape(1, input_size)
 
         # Determine the output size based on the shape of the sorted centroid record
@@ -247,11 +248,13 @@ class DQNAgent:
 
                     # Calculate the target Q-values by combining the immediate rewards, discounted maximum Q-values, and the current Q-values
                     targets = q_values + self.learning_rate * \
-                        (rewards * q_values + self.gamma *
+                        (rewards + self.gamma *
                          max_next_q_values - q_values)
 
                     targets = targets.expand_as(q_values)
+
                     loss = self.criterion(q_values, targets)
+                    
                     # Append the loss to the losses list
                     self.losses.append(loss.item())
 

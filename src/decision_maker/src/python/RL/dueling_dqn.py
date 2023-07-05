@@ -34,9 +34,6 @@ class DuelingDQN(nn.Module):
         )
 
     def forward(self, x):
-        """
-        The value stream captures the value of being in a particular state, which represents the expected return or utility of that state. It helps the agent understand how good or promising a state is on its own, regardless of the specific action taken.
-        """
         # Pass the input state through the feature layer
         features = self.feature_layer(x)
 
@@ -246,7 +243,7 @@ class DuelingDQNAgent:
                         dim=1, keepdim=True)[0]
 
                     targets = q_values + self.learning_rate * \
-                        (rewards * q_values + self.gamma *
+                        (rewards + self.gamma *
                          max_next_q_values - q_values)
 
                     targets = targets.expand_as(q_values)

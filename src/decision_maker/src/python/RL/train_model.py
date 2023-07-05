@@ -6,7 +6,7 @@ sys.path.append(
 
 # RL Parementers
 gazebo_env = 'aws_house'
-algo = 'dqn'
+algo = 'dueling_dqn'
 repeat_count = 5
 gamma = 0.90
 learning_rate = 0.01
