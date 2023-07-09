@@ -97,11 +97,15 @@ Autonomous Exploration:
   ```
   roslaunch decision_maker autonomous_agent.launch
   ```
-Launch the gazebo environment and decision maker together (Change environment and set repeat/exploration counter in train_script.py):  
+Launch the gazebo environment and decision maker together: 
+
+(Change environment and set repeat/exploration counter in decision_maker/variables.py)
   ```
   roslaunch decision_maker train_script_agent.launch
   ```
-Test RL models (Select algo in variables.py):
+Test RL models:
+
+(Select algo in decision_maker/variables.py)
   ```
   roslaunch decision_maker test_RL_script_agent.launch
   ```
