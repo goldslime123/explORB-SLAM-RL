@@ -1,4 +1,4 @@
-ExplORB-SLAM-RL
+Original: ExplORB-SLAM
 ============
 
 A package for Active visual SLAM using the structure of the underlying pose-graph.
