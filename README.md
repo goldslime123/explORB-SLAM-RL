@@ -1,5 +1,13 @@
-Original: ExplORB-SLAM
+ExplORB-SLAM-RL
 ============
+Build on top of ExplORB-SLAM which includes deep reinforcement models
+ - Deep Q Network (DQN)
+ - Double Deep Q Network (DDQN)
+ - Dueling Deep Q Network (Dueling DQN)
+ - Dueling Double Deep Q Network (Dueling DDQN)
+
+Original: ExplORB-SLAM
+------------
 
 A package for Active visual SLAM using the structure of the underlying pose-graph.
 
@@ -46,6 +54,7 @@ git clone https://github.com/goldslime123/explORB-SLAM-RL.git
 2. Compile
 ```
 cd explORB-SLAM-RL/
+rm -r build devel
 catkin make
 ```
 
@@ -69,21 +78,28 @@ catkin make
 
 Launch Environments:
 ------------
-  AWS house environment:
+  [AWS House](https://github.com/aws-robotics/aws-robomaker-small-house-world):
   ```
   roslaunch robot_description aws_house.launch
   ```
-  AWS bookstore environment:
+   [AWS Bookstore](https://github.com/aws-robotics/aws-robomaker-small-house-world](https://github.com/aws-robotics/aws-robomaker-bookstore-world)):
   ```
   roslaunch robot_description aws_bookstore.launch
-  ```
-  AWS warehouse environment:
-  ```
-  roslaunch robot_description aws_warehouse.launch
   ```
 
 Launch Decision maker
 ------------
+Autonomous Exploration:
   ```
   roslaunch decision_maker autonomous_agent.launch
   ```
+Launch the gazebo environment and decision maker together (Change environment and set repeat/exploration counter in train_script.py):
+```
+  roslaunch decision_maker train_script_agent.launch
+  ```
+Test RL modles (Select algo in variables.py):
+```
+  roslaunch decision_maker test_RL_script_agent.launch
+  ```
+
+
