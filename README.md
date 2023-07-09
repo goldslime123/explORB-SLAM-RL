@@ -97,7 +97,7 @@ Launch the gazebo environment and decision maker together (Change environment an
 ```
   roslaunch decision_maker train_script_agent.launch
   ```
-Test RL modles (Select algo in variables.py):
+Test RL models (Select algo in variables.py):
 ```
   roslaunch decision_maker test_RL_script_agent.launch
   ```
