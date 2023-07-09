@@ -239,7 +239,7 @@ class DDQNAgent:
                     # Select the action with the highest Q-value using the online network
                     next_q_values = self.ddqn(next_states)
 
-                    # diff here
+                    # Extract the action with the highest Q-value for the next states
                     next_actions = next_q_values.argmax(dim=1, keepdim=True)
 
                     # Estimate the corresponding Q-values for the next states using the target network

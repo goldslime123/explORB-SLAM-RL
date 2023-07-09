@@ -236,13 +236,13 @@ class DQNAgent:
                     dones = torch.tensor(
                         dones, dtype=torch.float32).unsqueeze(-1).to(self.device)
 
-                    # Compute the Q-values for the next states using the online network:
+                    # Compute the Q-values for the current states using the online network:
                     q_values = self.dqn(states)
 
                     # Compute the Q-values for the next states using the target DQN network:
                     next_q_values = self.target_dqn(next_states)
 
-                    # Find the maximum Q-value for each next state
+                    # Find the maximum Q-value for each next state using target network 
                     max_next_q_values = next_q_values.max(
                         dim=1, keepdim=True)[0]
 
