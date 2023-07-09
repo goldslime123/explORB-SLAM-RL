@@ -1,7 +1,7 @@
 <!--  Launch file for single robot on Gazebo -->
 
 <launch>
-    <arg name="gazebo_gui" value="true"/>
+    <arg name="gazebo_gui" value="false"/>
     <arg name="gazebo_verbose" value="false"/>
     <arg name="robot_ns" value="robot_1"/>
 
