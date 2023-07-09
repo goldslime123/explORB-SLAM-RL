@@ -1,10 +1,14 @@
 ExplORB-SLAM-RL
 ============
-Build on top of ExplORB-SLAM which includes deep reinforcement models
+Build on top of ExplORB-SLAM which includes deep reinforcement models in previously explored areas in different Gazebo environments
+
+All models are build on current existing Q Learning implementation:
  - Deep Q Network (DQN)
  - Double Deep Q Network (DDQN)
  - Dueling Deep Q Network (Dueling DQN)
  - Dueling Double Deep Q Network (Dueling DDQN)
+
+Contact: 2000553@sit.singaporetech.edu.sg
 
 Original: ExplORB-SLAM
 ------------
@@ -15,7 +19,7 @@ Code used for the paper "ExplORB-SLAM: Active Visual SLAM Exploiting the Pose-gr
 
 Tested by jplaced for Ubuntu 20.04, ROS Noetic.
 
-Contact: jplaced@unizar.es, jjgomez@unizar.es, kenji188@gmail.com
+Contact: jplaced@unizar.es, jjgomez@unizar.es
 
 Citation
 ------------
