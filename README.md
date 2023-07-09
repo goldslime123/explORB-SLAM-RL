@@ -1,6 +1,6 @@
 ExplORB-SLAM-RL
 ============
-Build on top of ExplORB-SLAM which includes deep reinforcement models in previously explored areas in different Gazebo environments
+Build on top of ExplORB-SLAM which includes deep reinforcement models in previously explored areas in different Gazebo environments.
 
 All models are build on current existing Q Learning implementation:
  - Deep Q Network (DQN)
@@ -86,7 +86,7 @@ Launch Environments:
   ```
   roslaunch robot_description aws_house.launch
   ```
-   [AWS Bookstore](https://github.com/aws-robotics/aws-robomaker-small-house-world](https://github.com/aws-robotics/aws-robomaker-bookstore-world)):
+  [AWS Bookstore](https://github.com/aws-robotics/aws-robomaker-small-house-world](https://github.com/aws-robotics/aws-robomaker-bookstore-world)):
   ```
   roslaunch robot_description aws_bookstore.launch
   ```
