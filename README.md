@@ -10,7 +10,7 @@ All models are build on current existing Q Learning implementation:
 
 Contact: 2000553@sit.singaporetech.edu.sg
 
-Original: ExplORB-SLAM
+Original Paper: [ExplORB-SLAM](https://github.com/JulioPlaced/ExplORB-SLAM)
 ------------
 
 A package for Active visual SLAM using the structure of the underlying pose-graph.
@@ -25,6 +25,10 @@ Citation
 ------------
 
 Placed, J. A., Gómez-Rodríguez, J. J., Tardós, J. D., & Castellanos, J. A. (2022). ExplORB-SLAM: Active Visual SLAM Exploiting the Pose-graph Topology. In 2022 Fifth Iberian Robotics Conference (ROBOT).
+
+Results
+------------
+You can reproduce all results in the paper with our code. All results have been described in our paper including Appendix. The results of the experiments will be different due to various hardware specifications. However, if you experiment several times by modifying the hyperparameter value in variables.py, you will be able to reproduce all of our analysis.
 
 Dependencies:
 ------------
@@ -48,10 +52,6 @@ Build Repository
 ------------
 1. Clone repo:
 ```
-Original Repository:
-git clone https://github.com/JulioPlaced/ExplORBSLAM.git
-
-Updated Repository:
 git clone https://github.com/goldslime123/explORB-SLAM-RL.git
 ```
 
@@ -109,5 +109,7 @@ Test RL models:
   ```
   roslaunch decision_maker test_RL_script_agent.launch
   ```
+
+
 
 
