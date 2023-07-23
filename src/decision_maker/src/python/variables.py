@@ -12,8 +12,8 @@ gazebo_env = 'aws_house'
 
 # able to map all areas
 if gazebo_env == "aws_house":
-    repeat_count = 1
-    explore_time = 700
+    repeat_count = 4
+    explore_time = 450
     
     output_size = 10
     no_frontier_counter = 10
@@ -41,8 +41,8 @@ batch_size - model update one experience at a time (will always be 1)
 penalty - agent discourage from selecting centroid with [0,0]
 """
 # dqn_5, dqn_10, dqn_15, dqn_20
-algo = 'dqn'
-model_name = f'{algo}_5'
+algo = 'dueling_ddqn'
+model_name = f'{algo}_20'
 gamma = 0.90
 learning_rate = 0.01
 epsilon = 1
