@@ -8,7 +8,7 @@ All models are build on current existing Q Learning implementation:
  - Dueling Deep Q Network (Dueling DQN)
  - Dueling Double Deep Q Network (Dueling DDQN)
  
- [Reinforcement Learning with Frontier-Based Exploration via Autonmous Environment](https://arxiv.org/abs/2307.07296)
+Paper: [Reinforcement Learning with Frontier-Based Exploration via Autonmous Environment](https://arxiv.org/abs/2307.07296)
 
 
 Contact: 2000553@sit.singaporetech.edu.sg
